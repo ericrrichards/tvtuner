@@ -18,7 +18,7 @@
 </script>
 
 @foreach (var show in Model.Series) {
-    <div>
-        <a href="@Url.Action("Show", new {id=show.SeriesID})"><img src="@Url.Action("GetSeriesBanner", "Home", new {id=show.SeriesID})"/></a>
+    <div class="text-center">
+        <a href="@Url.Action("Show", new {id=show.SeriesID})"><img class="img-rounded" src="@Url.Action("GetSeriesBanner", "Home", new {id=show.SeriesID})"/></a>
     </div>
 }

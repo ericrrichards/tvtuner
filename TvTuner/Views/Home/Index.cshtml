@@ -17,26 +17,8 @@
     });
 </script>
 
-
-<video width="640" height="480" controls="controls" >
-</video>
-<div class="float-right">
-    <h1>Shows</h1>
-    <ul>
-        @foreach (var show in Model.Series) {
-            <li>@show.Name
-                <ol>
-                    @foreach (var ep in Model.ShowEpisodes[show.Name]) {
-                        <li><a href="@ep.VideoPath" class="vidLink">@ep.Name</a></li>
-                    }
-                    
-                    
-
-                </ol>
-
-            </li>
-        }
-    </ul>
-    
-
-</div>
+@foreach (var show in Model.Series) {
+    <div>
+        <a href="@Url.Action("Show", new {id=show.SeriesID})"><img src="@Url.Action("GetSeriesBanner", "Home", new {id=show.SeriesID})"/></a>
+    </div>
+}

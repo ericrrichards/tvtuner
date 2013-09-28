@@ -313,6 +313,8 @@
       <LastGenOutput>TvTuner.designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="Views\Home\Show.cshtml" />
+    <Content Include="Views\Home\Watch.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

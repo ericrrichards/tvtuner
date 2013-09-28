@@ -1,0 +1,36 @@
+﻿@model TvTuner.Controllers.ShowModel
+
+
+<img src="@Url.Action("GetSeriesBanner", new {id=@Model.Series.SeriesID})"/>
+<p>@Model.Series.Summary</p>
+
+<div>
+    <a href="@Url.Action("RandomEpisode", new {id=@Model.Series.SeriesID})">Random Episode</a>
+</div>
+
+@{
+    var lastSeason = -1;
+    foreach (var episode in Model.Episodes) {
+        if (episode.Season > lastSeason) {
+            lastSeason = episode.Season;
+            <h1>@(lastSeason != 0 ? "Season " + lastSeason : "Special Features") </h1>
+            <hr/>
+        }
+        <div>
+            <table>
+                <tr>
+                    <td style="width: 33%">
+                        <a href="@Url.Action("Watch", new {id=episode.EpisodeID})"><img style="width: 100%"  src="@Url.Action("GetEpisodeThumb", new { id = episode.EpisodeID })"/></a>
+                    </td>
+                    <td>@if (episode.Season > 0) {
+                            <p><b>Season: </b>@episode.Season</p>
+                            <p><b>Episode: </b>@episode.EpisodeNumber</p>
+                        }
+                        <p><b>@episode.Name</b></p>
+                        <p>@episode.Summary</p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    }
+}

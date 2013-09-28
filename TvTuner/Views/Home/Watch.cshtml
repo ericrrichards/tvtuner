@@ -1,0 +1,20 @@
+﻿@model TvTuner.Episode
+
+<script type="text/javascript">
+    $(document).ready(function() {
+
+        $("video").on("ended", function() {
+            window.location = "../RandomEpisode/" + $("#ShowID").val();
+        });
+    });
+
+
+</script>
+
+<input type="hidden" id="ShowID" value="@Model.SeriesID"/>
+
+<a href="@Url.Action("Show", new {id=Model.SeriesID})"><img src="@Url.Action("GetSeriesBanner", new {id=@Model.Series.SeriesID})"/></a>
+<h1>Season @Model.Season Episode @Model.EpisodeNumber - @Model.Name</h1>
+<video width="640" height="480" controls="controls" autoplay="autoplay">
+    <source src="@Model.VideoPath" type="video/mp4"/>
+</video>

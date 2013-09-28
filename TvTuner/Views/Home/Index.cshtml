@@ -1,0 +1,42 @@
+﻿@model TvTuner.Controllers.IndexModel
+
+@{
+    ViewBag.Title = "Home Page";
+    
+}
+
+<script type="text/javascript">
+
+    $(document).ready(function() {
+        $("a.vidLink").on("click", function(e) {
+            e.preventDefault();
+
+            $("video").children().remove();
+            $("video").append("<source src=\"" + $(this).prop("href") + "\" type='video/mp4'>");
+        });
+    });
+</script>
+
+
+<video width="640" height="480" controls="controls" >
+</video>
+<div class="float-right">
+    <h1>Shows</h1>
+    <ul>
+        @foreach (var show in Model.Series) {
+            <li>@show.Name
+                <ol>
+                    @foreach (var ep in Model.ShowEpisodes[show.Name]) {
+                        <li><a href="@ep.VideoPath" class="vidLink">@ep.Name</a></li>
+                    }
+                    
+                    
+
+                </ol>
+
+            </li>
+        }
+    </ul>
+    
+
+</div>

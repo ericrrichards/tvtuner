@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ordesignerObjectsDiagram dslVersion="1.0.0.0" absoluteBounds="0, 0, 11, 8.5" name="TbTuner">
+  <DataContextMoniker Name="/TbTunerDataContext" />
+  <nestedChildShapes>
+    <classShape Id="9ea8594f-abd2-4889-a9f1-8350cd81e4f3" absoluteBounds="5.75, 1.75, 2, 2.3478011067708335">
+      <DataClassMoniker Name="/TbTunerDataContext/Episode" />
+      <nestedChildShapes>
+        <elementListCompartment Id="2a11074e-faf4-4ef7-8014-dd5ed98130e7" absoluteBounds="5.765, 2.21, 1.9700000000000002, 1.7878011067708335" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="692a7e47-e477-444f-9575-d45fa1cafab9" absoluteBounds="2.375, 2, 2, 1.5785953776041666">
+      <DataClassMoniker Name="/TbTunerDataContext/Series" />
+      <nestedChildShapes>
+        <elementListCompartment Id="75563e27-547e-4b1b-803c-948611816698" absoluteBounds="2.39, 2.46, 1.9700000000000002, 1.0185953776041665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(4.375 : 2.78929768880208); (5.75 : 2.78929768880208)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+      <AssociationMoniker Name="/TbTunerDataContext/Series/Series_Episode" />
+      <nodes>
+        <classShapeMoniker Id="692a7e47-e477-444f-9575-d45fa1cafab9" />
+        <classShapeMoniker Id="9ea8594f-abd2-4889-a9f1-8350cd81e4f3" />
+      </nodes>
+    </associationConnector>
+  </nestedChildShapes>
+</ordesignerObjectsDiagram>

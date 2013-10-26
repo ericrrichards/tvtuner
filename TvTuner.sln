@@ -5,6 +5,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TvTuner", "TvTuner\TvTuner.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseStuffer", "DatabaseStuffer\DatabaseStuffer.csproj", "{201706F3-0130-4213-AA3D-BD7AA4982980}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "videoTranscoder", "E:\Data\Visual Studio 2012\Projects\videoTranscoder\videoTranscoder\videoTranscoder.csproj", "{9EC22FF5-10C9-4AB2-AE1E-46AF4F9EE187}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovieStuffer", "MovieStuffer\MovieStuffer.csproj", "{38B419A0-BDD0-43E9-9BD2-416526616043}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,6 +23,14 @@ Global
 		{201706F3-0130-4213-AA3D-BD7AA4982980}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{201706F3-0130-4213-AA3D-BD7AA4982980}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{201706F3-0130-4213-AA3D-BD7AA4982980}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9EC22FF5-10C9-4AB2-AE1E-46AF4F9EE187}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9EC22FF5-10C9-4AB2-AE1E-46AF4F9EE187}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9EC22FF5-10C9-4AB2-AE1E-46AF4F9EE187}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9EC22FF5-10C9-4AB2-AE1E-46AF4F9EE187}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38B419A0-BDD0-43E9-9BD2-416526616043}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38B419A0-BDD0-43E9-9BD2-416526616043}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38B419A0-BDD0-43E9-9BD2-416526616043}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38B419A0-BDD0-43E9-9BD2-416526616043}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

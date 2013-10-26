@@ -11,43 +11,67 @@ namespace DatabaseStuffer {
     using System.Windows.Forms;
     using System.Xml.Linq;
 
+    public static class TVDBKey {
+        public const string ApiKey = "645AAFA61BE26C3C";
+    }
+
     class Program {
-        private static string VideoPath;
+        public static string VideoPath;
         [STAThreadAttribute]
         static void Main(string[] args) {
-            var dirPicker = new System.Windows.Forms.FolderBrowserDialog();
+
+            
+            var dirPicker = new FolderBrowserDialog();
             if (dirPicker.ShowDialog() != DialogResult.OK) {
                 return;
             }
             VideoPath = dirPicker.SelectedPath;
 
+            var form = new ShowPicker(VideoPath);
+            form.ShowDialog();
 
-            var xml = XDocument.Load("en.xml");
+            var xml = XDocument.Load(form.XmlStream);
 
             var series = GetSeries(xml);
             
             using (var db = new TbTunerDataContext()) {
+                if (Directory.GetFiles(VideoPath, "*.mp4").Count() == 1) {
+                    var movie = GetMovie(series, Directory.GetFiles(VideoPath, "*.mp4").First(), xml);
+                    db.Movies.InsertOnSubmit(movie);
+                } else {
+                    if (!db.Series.Any(s => s.Name == series.Name)) {
+                        db.Series.InsertOnSubmit(series);
+                    }
+                    db.SubmitChanges();
 
-                if (!db.Series.Any(s => s.Name == series.Name)) {
-                    db.Series.InsertOnSubmit(series);
-                }
-                db.SubmitChanges();
-
-                series = db.Series.First(f => f.Name == series.Name);
-                var episodes = GetEpisodes(xml, series);
-                foreach (var episode in episodes) {
-                    if (db.Episodes.Any(e1 => e1.Name == episode.Name)) {
-
-                    } else {
-                        
-                        db.Episodes.InsertOnSubmit(episode);
-                        db.SubmitChanges();
+                    series = db.Series.First(f => f.Name == series.Name);
+                    var episodes = GetEpisodes(xml, series);
+                    foreach (var episode in episodes) {
+                        if (db.Episodes.Any(e1 => e1.SeriesID == episode.SeriesID && e1.EpisodeNumber == episode.EpisodeNumber && e1.Season == episode.Season)) {
+                            // do nothing
+                        } else {
+                            episode.Series = series;
+                            db.Episodes.InsertOnSubmit(episode);
+                            db.SubmitChanges();
+                        }
                     }
                 }
-
                 db.SubmitChanges();
 
             }
+        }
+
+        private static Movy GetMovie(Series series, string movieFile, XDocument xml) {
+            var ret = new Movy();
+            ret.Title = series.Name;
+            ret.Year = DateTime.Parse(xml.Descendants("FirstAired").First().Value).Year;
+            ret.Summary = series.Summary;
+            ret.Rating = (int)(Convert.ToSingle(xml.Descendants("Rating").First().Value) * 10.0);
+            ret.VideoPath = movieFile;
+            var wc = new WebClient();
+            var thumbPath = Path.Combine("http://thetvdb.com/banners", xml.Descendants("poster").First().Value);
+            ret.Thumbnail = wc.DownloadData(thumbPath).ToArray();
+            return ret;
         }
 
         private static List<Episode> GetEpisodes(XDocument xml, Series series) {
@@ -77,7 +101,7 @@ namespace DatabaseStuffer {
 
                 var thumbPath = Path.Combine("http://thetvdb.com/banners", epElem.Descendants("filename").First().Value);
                 ep.Thumbnail = wc.DownloadData(thumbPath).ToArray();
-                ep.Series = series;
+                //ep.Series = series;
                 ret.Add(ep);
             }
             return ret;
@@ -89,15 +113,15 @@ namespace DatabaseStuffer {
                 return bestMatch;
             }
             bestMatch = vidFiles.FirstOrDefault(v =>
-                                                (v.Contains("S" + ep.Season.ToString("D2")) ) &&
-                                                (v.Contains("E" + ep.EpisodeNumber.ToString("D2"))));
+                                                (v.ToUpper().Contains("S" + ep.Season.ToString("D2")) ) &&
+                                                (v.ToUpper().Contains("E" + ep.EpisodeNumber.ToString("D2"))));
             if (!string.IsNullOrEmpty(bestMatch)) {
                 return bestMatch;
             }
             var words = ep.Name.Split(new[] { ' ', ':', ')', '(', ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
             words.Remove("the");
             words.Remove("of");
-
+            int bestContains = 0;
             foreach (var vidFile in vidFiles) {
                 var contains = 0;
                 var v = vidFile.Replace(series.Name, "");
@@ -107,12 +131,16 @@ namespace DatabaseStuffer {
                     }
                 }
                
-                if (contains >= words.Count * 0.7) {
+                if (contains > bestContains) {
+                    bestContains = contains;
                     bestMatch = vidFile;
-                    return vidFile;
+                    
                 }
             }
-
+            if (bestContains >= words.Count * 0.5f) {
+                return bestMatch;
+            }
+            
 
             return null;
         }

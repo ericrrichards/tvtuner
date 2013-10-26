@@ -14,12 +14,18 @@
         <elementListCompartment Id="75563e27-547e-4b1b-803c-948611816698" absoluteBounds="2.39, 2.46, 1.9700000000000002, 1.0185953776041665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
-    <associationConnector edgePoints="[(4.375 : 2.78929768880208); (5.75 : 2.78929768880208)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+    <associationConnector edgePoints="[(4.375 : 2.78929768880208); (5.75 : 2.78929768880208)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <AssociationMoniker Name="/TbTunerDataContext/Series/Series_Episode" />
       <nodes>
         <classShapeMoniker Id="692a7e47-e477-444f-9575-d45fa1cafab9" />
         <classShapeMoniker Id="9ea8594f-abd2-4889-a9f1-8350cd81e4f3" />
       </nodes>
     </associationConnector>
+    <classShape Id="01d563aa-10db-4cd3-afbc-295b521ce628" absoluteBounds="2.375, 5.125, 2, 2.1554996744791666">
+      <DataClassMoniker Name="/TbTunerDataContext/Movy" />
+      <nestedChildShapes>
+        <elementListCompartment Id="1a44ad39-11b6-415f-ae01-bc4910e638ae" absoluteBounds="2.39, 5.585, 1.9700000000000002, 1.5954996744791665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
   </nestedChildShapes>
 </ordesignerObjectsDiagram>

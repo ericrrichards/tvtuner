@@ -1,0 +1,19 @@
+﻿@model TvTuner.Movies
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("video").on("ended", function () {
+            window.location = "../RandomEpisode/" + $("#ShowID").val();
+        });
+    });
+
+
+</script>
+<div class="text-center">
+    
+    <h3>@Model.Title</h3>
+    <video width="640" height="480" controls="controls" autoplay="autoplay">
+        <source src="@Model.VideoPath" type="video/mp4"/>
+    </video>
+</div>

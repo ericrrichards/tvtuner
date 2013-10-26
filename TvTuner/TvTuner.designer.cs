@@ -36,10 +36,13 @@ namespace TvTuner
     partial void InsertSeries(Series instance);
     partial void UpdateSeries(Series instance);
     partial void DeleteSeries(Series instance);
+    partial void InsertMovies(Movies instance);
+    partial void UpdateMovies(Movies instance);
+    partial void DeleteMovies(Movies instance);
     #endregion
 		
 		public TvTunerDataContext() : 
-				base(global::System.Configuration.ConfigurationManager.ConnectionStrings["TvTunerConnectionString"].ConnectionString, mappingSource)
+				base(global::System.Configuration.ConfigurationManager.ConnectionStrings["TvTunerConnectionString1"].ConnectionString, mappingSource)
 		{
 			OnCreated();
 		}
@@ -81,6 +84,14 @@ namespace TvTuner
 			get
 			{
 				return this.GetTable<Series>();
+			}
+		}
+		
+		public System.Data.Linq.Table<Movies> Movies
+		{
+			get
+			{
+				return this.GetTable<Movies>();
 			}
 		}
 	}
@@ -515,6 +526,212 @@ namespace TvTuner
 		{
 			this.SendPropertyChanging();
 			entity.Series = null;
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.Movies")]
+	public partial class Movies : INotifyPropertyChanging, INotifyPropertyChanged
+	{
+		
+		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
+		
+		private int _MovieID;
+		
+		private string _Title;
+		
+		private int _Year;
+		
+		private string _Summary;
+		
+		private int _Rating;
+		
+		private System.Data.Linq.Binary _Thumbnail;
+		
+		private string _VideoPath;
+		
+    #region Extensibility Method Definitions
+    partial void OnLoaded();
+    partial void OnValidate(System.Data.Linq.ChangeAction action);
+    partial void OnCreated();
+    partial void OnMovieIDChanging(int value);
+    partial void OnMovieIDChanged();
+    partial void OnTitleChanging(string value);
+    partial void OnTitleChanged();
+    partial void OnYearChanging(int value);
+    partial void OnYearChanged();
+    partial void OnSummaryChanging(string value);
+    partial void OnSummaryChanged();
+    partial void OnRatingChanging(int value);
+    partial void OnRatingChanged();
+    partial void OnThumbnailChanging(System.Data.Linq.Binary value);
+    partial void OnThumbnailChanged();
+    partial void OnVideoPathChanging(string value);
+    partial void OnVideoPathChanged();
+    #endregion
+		
+		public Movies()
+		{
+			OnCreated();
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_MovieID", AutoSync=AutoSync.OnInsert, DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
+		public int MovieID
+		{
+			get
+			{
+				return this._MovieID;
+			}
+			set
+			{
+				if ((this._MovieID != value))
+				{
+					this.OnMovieIDChanging(value);
+					this.SendPropertyChanging();
+					this._MovieID = value;
+					this.SendPropertyChanged("MovieID");
+					this.OnMovieIDChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Title", DbType="NVarChar(200) NOT NULL", CanBeNull=false)]
+		public string Title
+		{
+			get
+			{
+				return this._Title;
+			}
+			set
+			{
+				if ((this._Title != value))
+				{
+					this.OnTitleChanging(value);
+					this.SendPropertyChanging();
+					this._Title = value;
+					this.SendPropertyChanged("Title");
+					this.OnTitleChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Year", DbType="Int NOT NULL")]
+		public int Year
+		{
+			get
+			{
+				return this._Year;
+			}
+			set
+			{
+				if ((this._Year != value))
+				{
+					this.OnYearChanging(value);
+					this.SendPropertyChanging();
+					this._Year = value;
+					this.SendPropertyChanged("Year");
+					this.OnYearChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Summary", DbType="NVarChar(MAX) NOT NULL", CanBeNull=false)]
+		public string Summary
+		{
+			get
+			{
+				return this._Summary;
+			}
+			set
+			{
+				if ((this._Summary != value))
+				{
+					this.OnSummaryChanging(value);
+					this.SendPropertyChanging();
+					this._Summary = value;
+					this.SendPropertyChanged("Summary");
+					this.OnSummaryChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Rating", DbType="Int NOT NULL")]
+		public int Rating
+		{
+			get
+			{
+				return this._Rating;
+			}
+			set
+			{
+				if ((this._Rating != value))
+				{
+					this.OnRatingChanging(value);
+					this.SendPropertyChanging();
+					this._Rating = value;
+					this.SendPropertyChanged("Rating");
+					this.OnRatingChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Thumbnail", DbType="VarBinary(MAX) NOT NULL", CanBeNull=false, UpdateCheck=UpdateCheck.Never)]
+		public System.Data.Linq.Binary Thumbnail
+		{
+			get
+			{
+				return this._Thumbnail;
+			}
+			set
+			{
+				if ((this._Thumbnail != value))
+				{
+					this.OnThumbnailChanging(value);
+					this.SendPropertyChanging();
+					this._Thumbnail = value;
+					this.SendPropertyChanged("Thumbnail");
+					this.OnThumbnailChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_VideoPath", DbType="NVarChar(MAX) NOT NULL", CanBeNull=false)]
+		public string VideoPath
+		{
+			get
+			{
+				return this._VideoPath;
+			}
+			set
+			{
+				if ((this._VideoPath != value))
+				{
+					this.OnVideoPathChanging(value);
+					this.SendPropertyChanging();
+					this._VideoPath = value;
+					this.SendPropertyChanged("VideoPath");
+					this.OnVideoPathChanged();
+				}
+			}
+		}
+		
+		public event PropertyChangingEventHandler PropertyChanging;
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void SendPropertyChanging()
+		{
+			if ((this.PropertyChanging != null))
+			{
+				this.PropertyChanging(this, emptyChangingEventArgs);
+			}
+		}
+		
+		protected virtual void SendPropertyChanged(String propertyName)
+		{
+			if ((this.PropertyChanged != null))
+			{
+				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
 		}
 	}
 }

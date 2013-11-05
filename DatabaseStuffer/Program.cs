@@ -47,7 +47,7 @@ namespace DatabaseStuffer {
                     series = db.Series.First(f => f.Name == series.Name);
                     var episodes = GetEpisodes(xml, series);
                     foreach (var episode in episodes) {
-                        if (db.Episodes.Any(e1 => e1.SeriesID == episode.SeriesID && e1.EpisodeNumber == episode.EpisodeNumber && e1.Season == episode.Season)) {
+                        if (db.Episodes.Any(e1 => e1.Name == episode.Name && e1.EpisodeNumber == episode.EpisodeNumber && e1.Season == episode.Season)) {
                             // do nothing
                         } else {
                             episode.Series = series;

@@ -13,11 +13,11 @@ namespace TvTuner.Controllers {
 
             var db = new TvTunerDataContext();
             var series = db.Series.ToList();
-            
+
             var indexModel = new IndexModel {
-                Series = series, 
+                Series = series,
             };
-            
+
 
             return View(indexModel);
         }
@@ -31,6 +31,7 @@ namespace TvTuner.Controllers {
             }
             return null;
         }
+
         public ActionResult Show(int id) {
             using (var db = new TvTunerDataContext()) {
                 var show = db.Series.FirstOrDefault(s => s.SeriesID == id);
@@ -39,13 +40,15 @@ namespace TvTuner.Controllers {
                 return View(model);
             }
         }
-        public ActionResult Watch(int id) {
+
+        public ActionResult Watch(int id, bool random = false) {
             var db = new TvTunerDataContext();
-                var episode = db.Episodes.FirstOrDefault(e => e.EpisodeID == id);
-                var home = new Uri(Server.MapPath(Request.Url.AbsolutePath));
-                episode.VideoPath = home.MakeRelativeUri(new Uri(episode.VideoPath)).ToString();
-                return View(episode);
-            
+            var episode = db.Episodes.FirstOrDefault(e => e.EpisodeID == id);
+            var home = new Uri(Server.MapPath(Request.Url.AbsolutePath));
+            episode.VideoPath = home.MakeRelativeUri(new Uri(episode.VideoPath)).ToString();
+            ViewBag.Random = random;
+            return View(episode);
+
         }
 
 
@@ -79,9 +82,31 @@ namespace TvTuner.Controllers {
 
                 var episodes = show.Episodes.ToArray();
                 var next = r.Next(episodes.Length);
+                ViewBag.Random = true;
 
-                return RedirectToAction("Watch", new { id = episodes[next].EpisodeID });
+                return RedirectToAction("Watch", new { id = episodes[next].EpisodeID, random=true });
             }
+        }
+
+        public ActionResult NextEpisode(int id) {
+            using (var db = new TvTunerDataContext()) {
+                var episode = db.Episodes.FirstOrDefault(e => e.EpisodeID == id);
+                var firstTry = db.Episodes.FirstOrDefault(e => e.SeriesID == episode.SeriesID && e.Season == episode.Season && e.EpisodeNumber == episode.EpisodeNumber + 1);
+                if (firstTry != null) {
+                    return RedirectToAction("Watch", new { id = firstTry.EpisodeID });
+                }
+
+                var secondTry = db.Episodes.FirstOrDefault(e => e.SeriesID == episode.SeriesID && e.Season == episode.Season+1 && e.EpisodeNumber ==  1);
+                if (secondTry != null) {
+                    return RedirectToAction("Watch", new { id = secondTry.EpisodeID });
+                }
+                var thirdTry = db.Episodes.FirstOrDefault(e => e.SeriesID == episode.SeriesID && e.Season ==  1 && e.EpisodeNumber == 1);
+                if (thirdTry != null) {
+                    return RedirectToAction("Watch", new { id = thirdTry.EpisodeID });
+                }
+                return RandomEpisode(episode.SeriesID);
+            }
+
         }
     }
 

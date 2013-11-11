@@ -1,0 +1,36 @@
+﻿@model System.Linq.IQueryable<TvTuner.Movies>
+@using TvTuner
+@{
+    ViewBag.Title = "Results for " + ViewBag.SearchTerm;
+}
+
+<form class="form-inline well" role="form" action="@Url.Action("Search")">
+    <div class="form-group">
+        <input type="text" placeholder="Search" id="searchForm" class="form-control" name="fragment" />
+    </div>
+    <button type="submit" class="btn btn-default">Search</button>
+</form>
+
+@if (!Model.Any()) {
+    <h2>No Results Found!</h2>
+} else {
+    <h2>Results for @ViewBag.SearchTerm</h2>
+}
+
+
+@foreach (var movie in Model) {
+    <div class="col-md-2">
+        <a href="@Url.Action("Watch", new { id = movie.MovieID })" class="movieLink">
+            <img alt="@movie.Title" class="img-rounded poster" src="@Url.Action("GetMovieBanner", "Movies", new { id = movie.MovieID })"/></a>
+
+
+    </div>
+    <div class="col-md-10 info well ">
+        <div class="movieTitle">@movie.Title</div>
+        <div class="summary">@movie.Year</div>
+        <div><span class="@Util.PickColor(movie.Rating)" style="font-size: xx-large">@movie.Rating%</span></div>
+        <div class="summary">@movie.Summary</div>
+
+    </div>
+}
+<div class="poster col-md-2"></div>

@@ -14,17 +14,17 @@
         <elementListCompartment Id="387277d3-b2ff-4067-b15f-835663f6e2d2" absoluteBounds="6.265, 3.46, 1.9700000000000002, 1.0185953776041665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
-    <associationConnector edgePoints="[(6.25 : 3.61140055338542); (3.875 : 3.61140055338542)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+    <associationConnector edgePoints="[(6.25 : 3.81655110677083); (3.875 : 3.81655110677083)]" fixedFrom="Algorithm" fixedTo="Algorithm">
       <AssociationMoniker Name="/TvTunerDataContext/Series/Series_Episode" />
       <nodes>
         <classShapeMoniker Id="7558e2fa-ba6c-44a5-83c5-aa5104acbe48" />
         <classShapeMoniker Id="b8f2df57-fdf2-43f1-a328-78426c184b77" />
       </nodes>
     </associationConnector>
-    <classShape Id="5f047432-f41f-4ca6-bc86-f1808ee8aff2" absoluteBounds="6.875, 0.625, 2, 2.1554996744791666">
+    <classShape Id="7e165510-6bda-4b36-962e-9cfdef995ee7" absoluteBounds="6, 0.5, 2, 2.3478011067708335">
       <DataClassMoniker Name="/TvTunerDataContext/Movies" />
       <nestedChildShapes>
-        <elementListCompartment Id="f4aaedf5-e74d-400d-8baa-7ee85508c4b0" absoluteBounds="6.89, 1.085, 1.9700000000000002, 1.5954996744791665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+        <elementListCompartment Id="2b80290a-e82a-4df7-ad3c-6bfbac2f5710" absoluteBounds="6.015, 0.96, 1.9700000000000002, 1.7878011067708335" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
   </nestedChildShapes>

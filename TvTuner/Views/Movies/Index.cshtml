@@ -1,99 +1,28 @@
-﻿@model TvTuner.Controllers.MoviesIndex
+﻿@using TvTuner
+@model TvTuner.Controllers.MoviesIndex
 
-@functions {
 
-    private static string PickColor(int rating) {
-        if (rating > 75) {
-            return "green";
-        }
-        if (rating > 50) {
-            return "yellow";
-        }
-        if (rating > 25) {
-            return "orange";
-        } else {
-            return "red";
-        }
-    }
-
-}
-<style type="text/css">
-    .poster
-    {
-        width: 180px;
-        height: 270px;
-    }
-
-    div.info
-    {
-        display: none;
-        width: 100%;
-    }
-
-    .infoShow
-    {
-        display: block;
-        position: absolute;
-        z-index: 200;
-        background-color: slategray;
-        color: white;
-        margin-left: 15px;
-    }
-
-    .summary
-    {
-        font-size: larger;
-    }
-
-    .green
-    {
-        color: springgreen;
-    }
-
-    .yellow
-    {
-        color: yellow;
-    }
-
-    .orange
-    {
-        color: orange;
-    }
-
-    .red
-    {
-        color: red;
-    }
-
-    .movieTitle
-    {
-        font-size: xx-large;
-        font-weight: 900;
-    }
-</style>
 <script type="text/javascript">
-    $(document).ready(function() {
-        $("a.movieLink").hover( function (o) {
-            //console.log(o.currentTarget);
-            //console.log($(o.currentTarget).parent());
-            //console.log($(o.currentTarget).parent().next());
-            $(o.currentTarget).parent().next().removeClass("info");
-            $(o.currentTarget).parent().next().addClass("infoShow");
-            var y = $(o.currentTarget).offset().top + window.screenY;
-            //console.log($(o.currentTarget));
-            console.log($($(o.currentTarget)[0]));
-            var h = $($(o.currentTarget)[0]).children(":first-child").height()/2;
-            console.log(h);
-            $(o.currentTarget).parent().next().css("top", y + h + 2);
+    
+    </script>
+<div class="well">
+    <form class="form-inline " role="form" action="@Url.Action("Search")">
+        <div class="form-group">
+            <input type="text" placeholder="Search" id="searchForm" class="form-control" name="fragment" />
+        </div>
+        <button type="submit" class="btn btn-default">Search</button>
 
+    </form>
+    <div class="dropdown">
+        <button class="dropdown-toggle btn btn-default" id="dropdownMenu1" data-toggle="dropdown">Genres <span class="caret"></span></button>
+        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+            @foreach (var genre in Model.Genres) {
+                <li role="presentation"><a role="menuitem" tabindex="-1" href="@Url.Action("Index", new { genre})">@genre</a></li>
+            }
+        </ul>
+    </div>
+</div>
 
-        },
-        function(o) {
-            $(o.currentTarget).parent().next().removeClass("infoShow");
-            $(o.currentTarget).parent().next().addClass("info");
-        });
-    });
-</script>
 
 @foreach (var movie in Model.movies) {
     <div class="col-md-2">
@@ -105,7 +34,7 @@
     <div class="col-md-10 info well ">
         <div class="movieTitle">@movie.Title</div>
         <div class="summary">@movie.Year</div>
-        <div><span class="@PickColor(movie.Rating)" style="font-size: xx-large">@movie.Rating%</span></div>
+        <div><span class="@Util.PickColor(movie.Rating)" style="font-size: xx-large">@movie.Rating%</span></div>
         <div class="summary">@movie.Summary</div>
 
     </div>

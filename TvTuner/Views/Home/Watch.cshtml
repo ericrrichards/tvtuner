@@ -20,11 +20,13 @@
     <input type="hidden" id="ShowID" value="@Model.SeriesID"/>
     <input type="hidden" id="RandomNext" value="@ViewBag.Random"/>
     <input type="hidden" id="epNo" value="@Model.EpisodeID"/>
-    <a href="@Url.Action("Show", new { id = Model.SeriesID })">
-        <img class="img-rounded" src="@Url.Action("GetSeriesBanner", new { id = @Model.Series.SeriesID })"/></a>
+    
     <h3>Season @Model.Season Episode @Model.EpisodeNumber - @Model.Name</h3>
     <video width="640" height="480" controls="controls" autoplay="autoplay">
         <source src="@Model.VideoPath" type="video/mp4"/>
     </video>
+    <a href="@Url.Action("Show", new { id = Model.SeriesID })">
+        <img class="img-rounded" src="@Url.Action("GetSeriesBanner", new { id = @Model.Series.SeriesID })" />
+    </a>
 </div>
 

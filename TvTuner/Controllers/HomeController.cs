@@ -6,6 +6,15 @@ using System.Web.Mvc;
 
 namespace TvTuner.Controllers {
     using System.IO;
+    using System.IO.Compression;
+    using System.Net;
+    using System.Text.RegularExpressions;
+    using System.Xml.Linq;
+
+    using DatabaseStuffer;
+
+    using Episode = TvTuner.Episode;
+    using Series = TvTuner.Series;
 
     public class HomeController : Controller {
         public ActionResult Index() {
@@ -84,7 +93,7 @@ namespace TvTuner.Controllers {
                 var next = r.Next(episodes.Length);
                 ViewBag.Random = true;
 
-                return RedirectToAction("Watch", new { id = episodes[next].EpisodeID, random=true });
+                return RedirectToAction("Watch", new { id = episodes[next].EpisodeID, random = true });
             }
         }
 
@@ -96,17 +105,102 @@ namespace TvTuner.Controllers {
                     return RedirectToAction("Watch", new { id = firstTry.EpisodeID });
                 }
 
-                var secondTry = db.Episodes.FirstOrDefault(e => e.SeriesID == episode.SeriesID && e.Season == episode.Season+1 && e.EpisodeNumber ==  1);
+                var secondTry = db.Episodes.FirstOrDefault(e => e.SeriesID == episode.SeriesID && e.Season == episode.Season + 1 && e.EpisodeNumber == 1);
                 if (secondTry != null) {
                     return RedirectToAction("Watch", new { id = secondTry.EpisodeID });
                 }
-                var thirdTry = db.Episodes.FirstOrDefault(e => e.SeriesID == episode.SeriesID && e.Season ==  1 && e.EpisodeNumber == 1);
+                var thirdTry = db.Episodes.FirstOrDefault(e => e.SeriesID == episode.SeriesID && e.Season == 1 && e.EpisodeNumber == 1);
                 if (thirdTry != null) {
                     return RedirectToAction("Watch", new { id = thirdTry.EpisodeID });
                 }
                 return RandomEpisode(episode.SeriesID);
             }
 
+        }
+
+        public ActionResult Add(string msg=null) {
+            using (var db = new TvTunerDataContext()) {
+                var series = db.Series.ToList();
+                ViewBag.Msg = msg;
+                return View(series);
+            }
+        }
+        [HttpPost]
+        public ActionResult Add(string path, int seriesID) {
+
+
+
+            using (var db = new TvTunerDataContext()) {
+
+                var show = db.Series.First(s => s.SeriesID == seriesID);
+
+
+                var name = show.Name;
+
+                var contentRoot = Server.MapPath("~/Content/Video");
+
+                var dirs = Directory.GetDirectories(contentRoot);
+                var bestChance = dirs.First(d => d.Contains(name));
+
+                var files = Directory.GetFiles(bestChance, path);
+                if (files.Count() == 1) {
+                    path = Path.GetFullPath(files[0]);
+                }
+
+                string id;
+                using (var wc = new WebClient()) {
+                    var address = string.Format("http://thetvdb.com/api/GetSeries.php?seriesname={0}", GetSearchTerms(name));
+                    var searchResults = XDocument.Parse(wc.DownloadString(address));
+
+                    var series = searchResults.Descendants("Series").First();
+                    id = series.Descendants("seriesid").First().Value;
+                    address = string.Format("http://thetvdb.com/api/{0}/series/{1}/all/en.zip", TVDBKey.ApiKey, id);
+                    var tempPath = Path.GetTempFileName();
+                    wc.DownloadFile(address, tempPath);
+
+                    var zip = ZipFile.Open(tempPath, ZipArchiveMode.Read);
+
+                    var seriesXml = zip.GetEntry("en.xml");
+                    var xmlStream = seriesXml.Open();
+                    var xml = XDocument.Load(xmlStream);
+
+                    var eps = xml.Descendants("Episode");
+                    var regex = new Regex(@"[Ss](\d\d).*[Ee](\d\d)");
+                    int season = 0, episode = 0;
+                    var m = regex.Match(path);
+                    if (m.Success) {
+                        season = Convert.ToInt32(m.Groups[1].Value);
+                        episode = Convert.ToInt32(m.Groups[2].Value);
+                    }
+
+                    var epsXml = eps.First(e => Convert.ToInt32(e.Descendants("SeasonNumber").First().Value) == season && 
+                        Convert.ToInt32(e.Descendants("EpisodeNumber").First().Value) == episode);
+
+                    var ep = new Episode();
+                    ep.Season = season;
+                    ep.EpisodeNumber = episode;
+                    ep.Name = epsXml.Descendants("EpisodeName").First().Value;
+                    ep.VideoPath = path;
+                    ep.Summary = epsXml.Descendants("Overview").First().Value;
+                    if (string.IsNullOrEmpty(ep.Summary)) {
+                        ep.Summary = "no summary";
+                    }
+                    var thumbPath = Path.Combine("http://thetvdb.com/banners", epsXml.Descendants("filename").First().Value);
+                    ep.Thumbnail = wc.DownloadData(thumbPath).ToArray();
+                    ep.Series = show;
+                    db.Episodes.InsertOnSubmit(ep);
+                    db.SubmitChanges();
+                }
+            }
+
+
+
+
+
+            return RedirectToAction("Add", new{msg="Successfully added " + Path.GetFileName(path)});
+        }
+        private static string GetSearchTerms(string text) {
+            return text.Split(new[] { ' ' }).Aggregate((i, j) => i + "+" + j);
         }
     }
 

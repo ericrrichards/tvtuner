@@ -1,0 +1,24 @@
+﻿@model List<TvTuner.Series>
+
+@{
+    ViewBag.Title = "Add Episode";
+}
+
+@if (!string.IsNullOrEmpty(ViewBag.Msg)) {
+    <div class="alert-success">
+        @ViewBag.Msg
+    </div>
+}
+
+<h2>Add Episode</h2>
+
+@using (Html.BeginForm("Add", "Home", FormMethod.Post)) {
+    <input type="file" name="path"  />
+    <select name="seriesID">
+        @foreach (var series in Model) {
+            <option value="@series.SeriesID">@series.Name</option>
+        }
+    </select>
+    
+    <input type="submit" value="Add"/>
+}

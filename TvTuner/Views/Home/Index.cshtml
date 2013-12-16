@@ -1,4 +1,5 @@
-﻿@model TvTuner.Controllers.IndexModel
+﻿@using System.Security.Policy
+@model TvTuner.Controllers.IndexModel
 
 @{
     ViewBag.Title = "Home Page";
@@ -7,8 +8,8 @@
 
 <script type="text/javascript">
 
-    $(document).ready(function() {
-        $("a.vidLink").on("click", function(e) {
+    $(document).ready(function () {
+        $("a.vidLink").on("click", function (e) {
             e.preventDefault();
 
             $("video").children().remove();
@@ -17,8 +18,60 @@
     });
 </script>
 
-@foreach (var show in Model.Series) {
-    <div class="text-center">
-        <a href="@Url.Action("Show", new {id=show.SeriesID})"><img class="img-rounded" src="@Url.Action("GetSeriesBanner", "Home", new {id=show.SeriesID})"/></a>
+<div class="col-md-2">
+    <div class="hidden-print affix bs-sidebar" role="complementary" >
+        <ul class="nav bs-sidenav">
+            @foreach (var category in Model.Series.Where(c => c.Value.Count > 0)) {
+                <li>
+                    <a href="#@category.Key.Replace(' ', '-')">@category.Key</a>
+                </li>
+            }
+        </ul>
     </div>
-}
+
+</div>
+
+<div class="col-md-10"  >
+    
+    @foreach (var category in Model.Series.Where(c=>c.Value.Count> 0)) {
+
+        
+                <h3 class="text-center" id="@category.Key.Replace(' ', '-')"   >
+                    @category.Key
+                </h3>
+            
+                    <div id="carousel-@category.Key.Replace(' ', '-')" class="carousel slide">
+                        <ol class="carousel-indicators">
+                            <li data-target="#carousel-@category.Key.Replace(' ', '-')" data-slide-to="0" class="active"></li>
+                            @for (var i = 1; i < category.Value.Count; i++) {
+                                <li data-target="#carousel-@category.Key.Replace(' ', '-')" data-slide-to="@i"></li>
+                            }
+
+                        </ol>
+
+                        <div class="carousel-inner">
+                            @for (var i = 0; i < category.Value.Count; i++) {
+                                <div class="item @(i == 0 ? "active" : "")">
+                                    <div class="text-center">
+                                        <a href="@Url.Action("Show", new { id = category.Value[i].SeriesID })">
+                                            <img class="img-rounded" src="@Url.Action("GetSeriesBanner", "Home", new { id = category.Value[i].SeriesID })"/></a>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Controls -->
+                        <a class="left carousel-control" href="#carousel-@category.Key.Replace(' ', '-')" data-slide="prev">
+                            <span class="glyphicon glyphicon-chevron-left"></span>
+                        </a>
+                        <a class="right carousel-control" href="#carousel-@category.Key.Replace(' ', '-')" data-slide="next">
+                            <span class="glyphicon glyphicon-chevron-right"></span>
+                        </a>
+                    </div>
+
+
+
+    }
+
+</div>
+

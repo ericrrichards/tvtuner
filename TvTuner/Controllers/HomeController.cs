@@ -21,10 +21,20 @@ namespace TvTuner.Controllers {
             ViewBag.Message = "Modify this template to jump-start your ASP.NET MVC application.";
 
             var db = new TvTunerDataContext();
-            var series = db.Series.ToList();
+            var series = db.Series.OrderBy(s=>s.Name).ToList();
+
+            var dict = db.Categories.ToDictionary(k => k.CategoryName, v => new List<Series>());
+            dict["Miscellaneous"] = new List<Series>();
+            foreach (var s in series) {
+                if (s.Category != null) {
+                    dict[s.Category.CategoryName].Add(s);
+                } else {
+                    dict["Miscellaneous"].Add(s);
+                }
+            }
 
             var indexModel = new IndexModel {
-                Series = series,
+                Series = dict,
             };
 
 
@@ -210,6 +220,7 @@ namespace TvTuner.Controllers {
     }
 
     public class IndexModel {
-        public List<Series> Series { get; set; }
+        public Dictionary<string, List<Series>> Series { get; set; }
+
     }
 }

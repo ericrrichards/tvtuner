@@ -44,7 +44,7 @@
                         <ol class="carousel-indicators">
                             <li data-target="#carousel-@category.Key.Replace(' ', '-')" data-slide-to="0" class="active"></li>
                             @for (var i = 1; i < category.Value.Count; i++) {
-                                <li data-target="#carousel-@category.Key.Replace(' ', '-')" data-slide-to="@i"></li>
+                                <li data-target="#carousel-@category.Key.Replace(' ', '-')" data-slide-to="@i" title="@category.Value[i].Name"></li>
                             }
 
                         </ol>

@@ -6,14 +6,22 @@
 
 @if (!string.IsNullOrEmpty(ViewBag.Msg)) {
     <div class="alert-success">
-        @ViewBag.Msg
+        @ViewBag.Msg.Replace("\n", "<br/>")
     </div>
+}
+
+
+<h2>Add Series</h2>
+@using (Html.BeginForm("AddSeries", "Home", FormMethod.Post)) {
+    <input type="text" name="name"/>
+    <input type="submit" value="Add"/>
+    
 }
 
 <h2>Add Episode</h2>
 
 @using (Html.BeginForm("Add", "Home", FormMethod.Post)) {
-    <input type="file" name="path"  />
+    <input type="file" name="paths" multiple />
     <select name="seriesID">
         @foreach (var series in Model) {
             <option value="@series.SeriesID">@series.Name</option>

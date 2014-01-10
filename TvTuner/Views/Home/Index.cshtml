@@ -19,8 +19,8 @@
 </script>
 
 <div class="col-md-2">
-    <div class="hidden-print affix bs-sidebar" role="complementary" >
-        <ul class="nav bs-sidenav">
+    <div class="hidden-print affix bs-sidebar" role="complementary"  >
+        <ul class="nav bs-sidenav" id="genreList" >
             @foreach (var category in Model.Series.Where(c => c.Value.Count > 0)) {
                 <li>
                     <a href="#@category.Key.Replace(' ', '-')">@category.Key</a>

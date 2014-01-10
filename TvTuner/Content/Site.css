@@ -63,7 +63,7 @@ div.info {
 /* All levels of nav */
 .bs-sidebar .nav > li > a {
   display: block;
-  color: #716b7a;
+  color: #dbd8e0;
   padding: 5px 20px;
 }
 .bs-sidebar .nav > li > a:hover,
@@ -76,7 +76,7 @@ div.info {
 .bs-sidebar .nav > .active:hover > a,
 .bs-sidebar .nav > .active:focus > a {
   font-weight: bold;
-  color: #563d7c;
+  color: #31313a;
   background-color: transparent;
   border-right: 1px solid #563d7c;
 }
@@ -122,6 +122,16 @@ div.info {
   .bs-sidebar.affix {
     width: 180px;
   }
+}
+
+body {
+    background-color: #21212a;
+    color: #dbd8e0;
+}
+#genreList {
+
+    background-color: #31313a;
+    text-shadow: 0 1px 0 #26262f;
 }
 
 

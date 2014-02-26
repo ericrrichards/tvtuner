@@ -45,7 +45,7 @@ namespace TvTuner.Controllers {
             using (var db = new TvTunerDataContext()) {
                 var show = db.Series.FirstOrDefault(s => s.SeriesID == id);
                 if (show != null) {
-                    return File(show.BannerImg.ToArray(), "img/jpeg");
+                    return File(show.BannerImg.ToArray(), "img/jpeg", id + ".jpeg");
                 }
             }
             return null;
@@ -57,6 +57,22 @@ namespace TvTuner.Controllers {
                 var model = new ShowModel() { Series = show };
                 model.Episodes = show.Episodes.OrderBy(e => e.Season).ThenBy(e=>e.EpisodeNumber).ToList();
                 return View(model);
+            }
+        }
+
+        public ActionResult WatchChannel(int id) {
+            using (var db = new TvTunerDataContext()) {
+                var channel = db.Channels.FirstOrDefault(c => c.ChannelID == id);
+                var rand = new Random();
+                var series = channel.ChannelSeries.Select(cs => cs.Series).ToList();
+                var pickedShow = series.ElementAt(rand.Next(series.Count()));
+                var pickedEpisode = pickedShow.Episodes.ElementAt(rand.Next(pickedShow.Episodes.Count));
+
+                ViewBag.ChannelID = id;
+                ViewBag.ChannelName = channel.Name;
+                var home = new Uri(Server.MapPath(Request.Url.AbsolutePath));
+                pickedEpisode.VideoPath = home.MakeRelativeUri(new Uri(pickedEpisode.VideoPath)).ToString();
+                return View(pickedEpisode);
             }
         }
 
@@ -150,7 +166,7 @@ namespace TvTuner.Controllers {
                 var contentRoot = Server.MapPath("~/Content/Video");
 
                 var dirs = Directory.GetDirectories(contentRoot);
-                var bestChance = dirs.FirstOrDefault(d => d.Contains(name));
+                var bestChance = dirs.FirstOrDefault(d => d.Contains(name)|| name.Contains(d));
                 if (bestChance == null) {
                     var directories = Directory.GetDirectories(Path.Combine(contentRoot, "HC"));
 
@@ -171,6 +187,9 @@ namespace TvTuner.Controllers {
                     }
                 }
 
+                if (name == "Archer") {
+                    name = name + " (2009)";
+                }
                 string id;
                 using (var wc = new WebClient()) {
                     var address = string.Format("http://thetvdb.com/api/GetSeries.php?seriesname={0}", GetSearchTerms(name));
@@ -295,6 +314,26 @@ namespace TvTuner.Controllers {
             }
             return null;
         }
+
+        public ActionResult Channels() {
+            using (var db = new TvTunerDataContext()) {
+                return View(db.Channels.Select(c => 
+                    new ChannelModel(){
+                        ChannelID = c.ChannelID, 
+                        Name = c.Name,
+                        SeriesIds = c.ChannelSeries.Select(cs=>cs.SeriesID).ToList()
+                    }
+                ).ToList());
+            }
+        }
+
+        
+    }
+
+    public class ChannelModel {
+        public int ChannelID { get; set; }
+        public string Name { get; set; }
+        public List<int> SeriesIds { get; set; } 
     }
 
     public class ShowModel {

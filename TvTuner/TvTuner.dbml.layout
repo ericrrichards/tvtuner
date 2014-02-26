@@ -40,5 +40,31 @@
         <classShapeMoniker Id="44134294-8d2a-487e-af0e-b205ceaa6b3a" />
       </nodes>
     </associationConnector>
+    <classShape Id="91a0a5bd-6147-4a18-80fc-cacda99b0c97" absoluteBounds="3.625, 0.5, 2, 1.1939925130208333">
+      <DataClassMoniker Name="/TvTunerDataContext/Channel" />
+      <nestedChildShapes>
+        <elementListCompartment Id="b11eac0d-009b-4a03-9a38-2d76bd0ccaa7" absoluteBounds="3.6399999999999997, 0.96, 1.9700000000000002, 0.63399251302083326" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="0e39c8ca-8f28-4ba9-bfb2-f5e8f198bb7c" absoluteBounds="4, 2.125, 2, 1.3862939453125">
+      <DataClassMoniker Name="/TvTunerDataContext/ChannelSery" />
+      <nestedChildShapes>
+        <elementListCompartment Id="b7054add-ba6c-49fc-98f9-a9cd89f68cdd" absoluteBounds="4.015, 2.585, 1.9700000000000002, 0.8262939453125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(4.8125 : 1.69399251302083); (4.8125 : 2.125)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+      <AssociationMoniker Name="/TvTunerDataContext/Channel/Channel_ChannelSery" />
+      <nodes>
+        <classShapeMoniker Id="91a0a5bd-6147-4a18-80fc-cacda99b0c97" />
+        <classShapeMoniker Id="0e39c8ca-8f28-4ba9-bfb2-f5e8f198bb7c" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(6.25 : 3.75); (6 : 3.5112939453125)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/TvTunerDataContext/Series/Series_ChannelSery" />
+      <nodes>
+        <classShapeMoniker Id="44134294-8d2a-487e-af0e-b205ceaa6b3a" />
+        <classShapeMoniker Id="0e39c8ca-8f28-4ba9-bfb2-f5e8f198bb7c" />
+      </nodes>
+    </associationConnector>
   </nestedChildShapes>
 </ordesignerObjectsDiagram>

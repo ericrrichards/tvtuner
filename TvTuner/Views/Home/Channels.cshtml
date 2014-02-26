@@ -1,0 +1,50 @@
+﻿@model List<TvTuner.Controllers.ChannelModel>
+
+@{
+    ViewBag.Title = "Channels";
+}
+
+<script>
+    $(function() {
+        setInterval(function() {
+            var current = $(".banners img:visible");
+            for (var i = 0; i < current.length; i++) {
+                AnimateBanners($(current[i]));
+            }
+            
+        }, 3000);
+    });
+    function AnimateBanners(current) {
+        var siblings = current.siblings();
+        var cnt = siblings.length;
+        
+        var idx = Math.floor(Math.random() * cnt);
+        console.log(cnt, idx);
+        var next = $(siblings[idx]);
+        if (next.length == 0) {
+            next = $(current.siblings()[0]);
+        }
+        console.log(next);
+        current.fadeOut("slow", function () { next.fadeIn(); });
+    }
+</script>
+
+
+@foreach (var channel in Model) {
+    <div class="row">
+        <div class ="col-lg-12">
+            <h2 class="text-center">@channel.Name</h2>
+            <div class="banners text-center">
+                <a href="@Url.Action("WatchChannel", new { id = channel.ChannelID})">
+                @for (var i = 0; i < channel.SeriesIds.Count; i++) {
+                    var style = "";
+                    if (i != 0) {
+                        style = "display:none;";
+                    }
+                    <img class="img-rounded" style="@style" src="@Url.Action("GetSeriesBanner", new { id = channel.SeriesIds[i] })"/>
+                }
+                </a>
+            </div>
+        </div> 
+    </div>
+}

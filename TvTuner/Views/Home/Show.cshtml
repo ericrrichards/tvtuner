@@ -8,6 +8,7 @@
 </div>
 <div>
     <a class="btn btn-primary" href="@Url.Action("RandomEpisode", new { id = @Model.Series.SeriesID })">Random Episode</a>
+    <a class="btn btn-primary" href="@Url.Action("Watch", new { id = @Model.Episodes.Last().EpisodeID })">Latest</a>
 </div>
 
 @{

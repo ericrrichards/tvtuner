@@ -185,6 +185,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\MyApiController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\MoviesController.cs" />
     <Compile Include="Filters\InitializeSimpleMembershipAttribute.cs" />
@@ -338,6 +339,8 @@
     <Content Include="Views\Movies\Watch.cshtml" />
     <Content Include="Views\Movies\Search.cshtml" />
     <Content Include="Views\Home\Add.cshtml" />
+    <Content Include="Views\Home\Channels.cshtml" />
+    <Content Include="Views\Home\WatchChannel.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

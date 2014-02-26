@@ -1,0 +1,26 @@
+﻿@model TvTuner.Episode
+
+@{
+    ViewBag.Title = @ViewBag.ChannelName;
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("video").on("ended", function () {
+                window.location = "../WatchChannel/" + $("#channelID").val();
+
+        });
+    });
+
+
+</script>
+
+<input type="hidden" id="channelID" value="@ViewBag.ChannelID"/>
+<div class="text-center">
+    
+    <h3>Season @Model.Season Episode @Model.EpisodeNumber - @Model.Name</h3>
+    <video width="640" height="480" controls="controls" autoplay="autoplay">
+        <source src="@Model.VideoPath" type="video/mp4"/>
+    </video>
+</div>

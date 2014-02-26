@@ -42,6 +42,12 @@ namespace TvTuner
     partial void InsertCategory(Category instance);
     partial void UpdateCategory(Category instance);
     partial void DeleteCategory(Category instance);
+    partial void InsertChannel(Channel instance);
+    partial void UpdateChannel(Channel instance);
+    partial void DeleteChannel(Channel instance);
+    partial void InsertChannelSery(ChannelSery instance);
+    partial void UpdateChannelSery(ChannelSery instance);
+    partial void DeleteChannelSery(ChannelSery instance);
     #endregion
 		
 		public TvTunerDataContext() : 
@@ -103,6 +109,22 @@ namespace TvTuner
 			get
 			{
 				return this.GetTable<Category>();
+			}
+		}
+		
+		public System.Data.Linq.Table<Channel> Channels
+		{
+			get
+			{
+				return this.GetTable<Channel>();
+			}
+		}
+		
+		public System.Data.Linq.Table<ChannelSery> ChannelSeries
+		{
+			get
+			{
+				return this.GetTable<ChannelSery>();
 			}
 		}
 	}
@@ -626,6 +648,8 @@ namespace TvTuner
 		
 		private EntitySet<Episode> _Episodes;
 		
+		private EntityRef<ChannelSery> _ChannelSery;
+		
 		private EntityRef<Category> _Category;
 		
     #region Extensibility Method Definitions
@@ -647,6 +671,7 @@ namespace TvTuner
 		public Series()
 		{
 			this._Episodes = new EntitySet<Episode>(new Action<Episode>(this.attach_Episodes), new Action<Episode>(this.detach_Episodes));
+			this._ChannelSery = default(EntityRef<ChannelSery>);
 			this._Category = default(EntityRef<Category>);
 			OnCreated();
 		}
@@ -765,6 +790,35 @@ namespace TvTuner
 			set
 			{
 				this._Episodes.Assign(value);
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Series_ChannelSery", Storage="_ChannelSery", ThisKey="SeriesID", OtherKey="SeriesID", IsUnique=true, IsForeignKey=false)]
+		public ChannelSery ChannelSery
+		{
+			get
+			{
+				return this._ChannelSery.Entity;
+			}
+			set
+			{
+				ChannelSery previousValue = this._ChannelSery.Entity;
+				if (((previousValue != value) 
+							|| (this._ChannelSery.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._ChannelSery.Entity = null;
+						previousValue.Series = null;
+					}
+					this._ChannelSery.Entity = value;
+					if ((value != null))
+					{
+						value.Series = this;
+					}
+					this.SendPropertyChanged("ChannelSery");
+				}
 			}
 		}
 		
@@ -946,6 +1000,312 @@ namespace TvTuner
 		{
 			this.SendPropertyChanging();
 			entity.Category = null;
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.Channels")]
+	public partial class Channel : INotifyPropertyChanging, INotifyPropertyChanged
+	{
+		
+		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
+		
+		private int _ChannelID;
+		
+		private string _Name;
+		
+		private EntitySet<ChannelSery> _ChannelSeries;
+		
+    #region Extensibility Method Definitions
+    partial void OnLoaded();
+    partial void OnValidate(System.Data.Linq.ChangeAction action);
+    partial void OnCreated();
+    partial void OnChannelIDChanging(int value);
+    partial void OnChannelIDChanged();
+    partial void OnNameChanging(string value);
+    partial void OnNameChanged();
+    #endregion
+		
+		public Channel()
+		{
+			this._ChannelSeries = new EntitySet<ChannelSery>(new Action<ChannelSery>(this.attach_ChannelSeries), new Action<ChannelSery>(this.detach_ChannelSeries));
+			OnCreated();
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ChannelID", AutoSync=AutoSync.OnInsert, DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
+		public int ChannelID
+		{
+			get
+			{
+				return this._ChannelID;
+			}
+			set
+			{
+				if ((this._ChannelID != value))
+				{
+					this.OnChannelIDChanging(value);
+					this.SendPropertyChanging();
+					this._ChannelID = value;
+					this.SendPropertyChanged("ChannelID");
+					this.OnChannelIDChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Name", DbType="NVarChar(50) NOT NULL", CanBeNull=false)]
+		public string Name
+		{
+			get
+			{
+				return this._Name;
+			}
+			set
+			{
+				if ((this._Name != value))
+				{
+					this.OnNameChanging(value);
+					this.SendPropertyChanging();
+					this._Name = value;
+					this.SendPropertyChanged("Name");
+					this.OnNameChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Channel_ChannelSery", Storage="_ChannelSeries", ThisKey="ChannelID", OtherKey="ChannelID")]
+		public EntitySet<ChannelSery> ChannelSeries
+		{
+			get
+			{
+				return this._ChannelSeries;
+			}
+			set
+			{
+				this._ChannelSeries.Assign(value);
+			}
+		}
+		
+		public event PropertyChangingEventHandler PropertyChanging;
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void SendPropertyChanging()
+		{
+			if ((this.PropertyChanging != null))
+			{
+				this.PropertyChanging(this, emptyChangingEventArgs);
+			}
+		}
+		
+		protected virtual void SendPropertyChanged(String propertyName)
+		{
+			if ((this.PropertyChanged != null))
+			{
+				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
+		}
+		
+		private void attach_ChannelSeries(ChannelSery entity)
+		{
+			this.SendPropertyChanging();
+			entity.Channel = this;
+		}
+		
+		private void detach_ChannelSeries(ChannelSery entity)
+		{
+			this.SendPropertyChanging();
+			entity.Channel = null;
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.ChannelSeries")]
+	public partial class ChannelSery : INotifyPropertyChanging, INotifyPropertyChanged
+	{
+		
+		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
+		
+		private int _ID;
+		
+		private int _ChannelID;
+		
+		private int _SeriesID;
+		
+		private EntityRef<Channel> _Channel;
+		
+		private EntityRef<Series> _Series;
+		
+    #region Extensibility Method Definitions
+    partial void OnLoaded();
+    partial void OnValidate(System.Data.Linq.ChangeAction action);
+    partial void OnCreated();
+    partial void OnIDChanging(int value);
+    partial void OnIDChanged();
+    partial void OnChannelIDChanging(int value);
+    partial void OnChannelIDChanged();
+    partial void OnSeriesIDChanging(int value);
+    partial void OnSeriesIDChanged();
+    #endregion
+		
+		public ChannelSery()
+		{
+			this._Channel = default(EntityRef<Channel>);
+			this._Series = default(EntityRef<Series>);
+			OnCreated();
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ID", AutoSync=AutoSync.OnInsert, DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
+		public int ID
+		{
+			get
+			{
+				return this._ID;
+			}
+			set
+			{
+				if ((this._ID != value))
+				{
+					this.OnIDChanging(value);
+					this.SendPropertyChanging();
+					this._ID = value;
+					this.SendPropertyChanged("ID");
+					this.OnIDChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ChannelID", DbType="Int NOT NULL")]
+		public int ChannelID
+		{
+			get
+			{
+				return this._ChannelID;
+			}
+			set
+			{
+				if ((this._ChannelID != value))
+				{
+					if (this._Channel.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnChannelIDChanging(value);
+					this.SendPropertyChanging();
+					this._ChannelID = value;
+					this.SendPropertyChanged("ChannelID");
+					this.OnChannelIDChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_SeriesID", DbType="Int NOT NULL")]
+		public int SeriesID
+		{
+			get
+			{
+				return this._SeriesID;
+			}
+			set
+			{
+				if ((this._SeriesID != value))
+				{
+					if (this._Series.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnSeriesIDChanging(value);
+					this.SendPropertyChanging();
+					this._SeriesID = value;
+					this.SendPropertyChanged("SeriesID");
+					this.OnSeriesIDChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Channel_ChannelSery", Storage="_Channel", ThisKey="ChannelID", OtherKey="ChannelID", IsForeignKey=true)]
+		public Channel Channel
+		{
+			get
+			{
+				return this._Channel.Entity;
+			}
+			set
+			{
+				Channel previousValue = this._Channel.Entity;
+				if (((previousValue != value) 
+							|| (this._Channel.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._Channel.Entity = null;
+						previousValue.ChannelSeries.Remove(this);
+					}
+					this._Channel.Entity = value;
+					if ((value != null))
+					{
+						value.ChannelSeries.Add(this);
+						this._ChannelID = value.ChannelID;
+					}
+					else
+					{
+						this._ChannelID = default(int);
+					}
+					this.SendPropertyChanged("Channel");
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Series_ChannelSery", Storage="_Series", ThisKey="SeriesID", OtherKey="SeriesID", IsForeignKey=true)]
+		public Series Series
+		{
+			get
+			{
+				return this._Series.Entity;
+			}
+			set
+			{
+				Series previousValue = this._Series.Entity;
+				if (((previousValue != value) 
+							|| (this._Series.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._Series.Entity = null;
+						previousValue.ChannelSery = null;
+					}
+					this._Series.Entity = value;
+					if ((value != null))
+					{
+						value.ChannelSery = this;
+						this._SeriesID = value.SeriesID;
+					}
+					else
+					{
+						this._SeriesID = default(int);
+					}
+					this.SendPropertyChanged("Series");
+				}
+			}
+		}
+		
+		public event PropertyChangingEventHandler PropertyChanging;
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void SendPropertyChanging()
+		{
+			if ((this.PropertyChanging != null))
+			{
+				this.PropertyChanging(this, emptyChangingEventArgs);
+			}
+		}
+		
+		protected virtual void SendPropertyChanged(String propertyName)
+		{
+			if ((this.PropertyChanged != null))
+			{
+				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
 		}
 	}
 }

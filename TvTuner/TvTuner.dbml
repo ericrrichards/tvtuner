@@ -33,6 +33,7 @@
       <Column Name="Summary" Type="System.String" DbType="NVarChar(MAX) NOT NULL" CanBeNull="false" />
       <Column Name="CategoryID" Type="System.Int32" DbType="Int" CanBeNull="true" />
       <Association Name="Series_Episode" Member="Episodes" ThisKey="SeriesID" OtherKey="SeriesID" Type="Episode" />
+      <Association Name="Series_ChannelSery" Member="ChannelSery" ThisKey="SeriesID" OtherKey="SeriesID" Type="ChannelSery" Cardinality="One" />
       <Association Name="Category_Series" Member="Category" ThisKey="CategoryID" OtherKey="CategoryID" Type="Category" IsForeignKey="true" />
     </Type>
   </Table>
@@ -41,6 +42,22 @@
       <Column Name="CategoryID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
       <Column Name="CategoryName" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
       <Association Name="Category_Series" Member="Series" ThisKey="CategoryID" OtherKey="CategoryID" Type="Series" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Channels" Member="Channels">
+    <Type Name="Channel">
+      <Column Name="ChannelID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="Name" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
+      <Association Name="Channel_ChannelSery" Member="ChannelSeries" ThisKey="ChannelID" OtherKey="ChannelID" Type="ChannelSery" />
+    </Type>
+  </Table>
+  <Table Name="dbo.ChannelSeries" Member="ChannelSeries">
+    <Type Name="ChannelSery">
+      <Column Name="ID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="ChannelID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="SeriesID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="Channel_ChannelSery" Member="Channel" ThisKey="ChannelID" OtherKey="ChannelID" Type="Channel" IsForeignKey="true" />
+      <Association Name="Series_ChannelSery" Member="Series" ThisKey="SeriesID" OtherKey="SeriesID" Type="Series" IsForeignKey="true" />
     </Type>
   </Table>
 </Database>

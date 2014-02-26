@@ -9,10 +9,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "videoTranscoder", "E:\Data\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovieStuffer", "MovieStuffer\MovieStuffer.csproj", "{38B419A0-BDD0-43E9-9BD2-416526616043}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tuner2", "tuner2\tuner2.csproj", "{155B39E3-F064-4874-BC48-A46B36DD255D}"
+EndProject
 Global
-	GlobalSection(CodealikeProperties) = postSolution
-		SolutionGuid = 3f2d9cbf-0685-40de-a0e8-a6d8e75f6512
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -34,8 +33,15 @@ Global
 		{38B419A0-BDD0-43E9-9BD2-416526616043}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{38B419A0-BDD0-43E9-9BD2-416526616043}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{38B419A0-BDD0-43E9-9BD2-416526616043}.Release|Any CPU.Build.0 = Release|Any CPU
+		{155B39E3-F064-4874-BC48-A46B36DD255D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{155B39E3-F064-4874-BC48-A46B36DD255D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{155B39E3-F064-4874-BC48-A46B36DD255D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{155B39E3-F064-4874-BC48-A46B36DD255D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(CodealikeProperties) = postSolution
+		SolutionGuid = 3f2d9cbf-0685-40de-a0e8-a6d8e75f6512
 	EndGlobalSection
 EndGlobal

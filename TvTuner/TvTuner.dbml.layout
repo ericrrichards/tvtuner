@@ -46,24 +46,24 @@
         <elementListCompartment Id="b11eac0d-009b-4a03-9a38-2d76bd0ccaa7" absoluteBounds="3.6399999999999997, 0.96, 1.9700000000000002, 0.63399251302083326" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
-    <classShape Id="0e39c8ca-8f28-4ba9-bfb2-f5e8f198bb7c" absoluteBounds="4, 2.125, 2, 1.3862939453125">
+    <classShape Id="bf712729-54a9-4e37-9827-da020b89e4c6" absoluteBounds="3.875, 2, 2, 1.5785953776041666">
       <DataClassMoniker Name="/TvTunerDataContext/ChannelSery" />
       <nestedChildShapes>
-        <elementListCompartment Id="b7054add-ba6c-49fc-98f9-a9cd89f68cdd" absoluteBounds="4.015, 2.585, 1.9700000000000002, 0.8262939453125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+        <elementListCompartment Id="f121906c-252b-41b9-8b17-dddc39639bd0" absoluteBounds="3.8899999999999997, 2.46, 1.9700000000000002, 1.0185953776041665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
-    <associationConnector edgePoints="[(4.8125 : 1.69399251302083); (4.8125 : 2.125)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+    <associationConnector edgePoints="[(4.78125 : 1.69399251302083); (4.78125 : 2)]" fixedFrom="Algorithm" fixedTo="Algorithm">
       <AssociationMoniker Name="/TvTunerDataContext/Channel/Channel_ChannelSery" />
       <nodes>
         <classShapeMoniker Id="91a0a5bd-6147-4a18-80fc-cacda99b0c97" />
-        <classShapeMoniker Id="0e39c8ca-8f28-4ba9-bfb2-f5e8f198bb7c" />
+        <classShapeMoniker Id="bf712729-54a9-4e37-9827-da020b89e4c6" />
       </nodes>
     </associationConnector>
-    <associationConnector edgePoints="[(6.25 : 3.75); (6 : 3.5112939453125)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+    <associationConnector edgePoints="[(6.25 : 3.75); (5.875 : 3.57859537760417)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <AssociationMoniker Name="/TvTunerDataContext/Series/Series_ChannelSery" />
       <nodes>
         <classShapeMoniker Id="44134294-8d2a-487e-af0e-b205ceaa6b3a" />
-        <classShapeMoniker Id="0e39c8ca-8f28-4ba9-bfb2-f5e8f198bb7c" />
+        <classShapeMoniker Id="bf712729-54a9-4e37-9827-da020b89e4c6" />
       </nodes>
     </associationConnector>
   </nestedChildShapes>

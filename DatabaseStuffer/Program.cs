@@ -47,7 +47,7 @@ namespace DatabaseStuffer {
                     series = db.Series.First(f => f.Name == series.Name);
                     var episodes = GetEpisodes(xml, series);
                     foreach (var episode in episodes) {
-                        if (db.Episodes.Any(e1 => e1.Name == episode.Name && e1.EpisodeNumber == episode.EpisodeNumber && e1.Season == episode.Season)) {
+                        if (db.Episodes.Any(e1 => e1.Name == episode.Name && e1.EpisodeNumber == episode.EpisodeNumber && e1.Season == episode.Season && e1.VideoPath == episode.VideoPath)) {
                             // do nothing
                         } else {
                             episode.Series = series;
@@ -115,6 +115,12 @@ namespace DatabaseStuffer {
             bestMatch = vidFiles.FirstOrDefault(v =>
                                                 (v.ToUpper().Contains("S" + ep.Season.ToString("D2")) ) &&
                                                 (v.ToUpper().Contains("E" + ep.EpisodeNumber.ToString("D2"))));
+            if (!string.IsNullOrEmpty(bestMatch)) {
+                return bestMatch;
+            }
+            bestMatch = vidFiles.FirstOrDefault(v =>
+                                                (v.ToUpper().Contains("." + ep.Season.ToString("D1"))) &&
+                                                (v.ToUpper().Contains("X" + ep.EpisodeNumber.ToString("D2"))));
             if (!string.IsNullOrEmpty(bestMatch)) {
                 return bestMatch;
             }

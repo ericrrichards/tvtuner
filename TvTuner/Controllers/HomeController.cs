@@ -64,7 +64,18 @@ namespace TvTuner.Controllers {
             using (var db = new TvTunerDataContext()) {
                 var channel = db.Channels.FirstOrDefault(c => c.ChannelID == id);
                 var rand = new Random();
-                var series = channel.ChannelSeries.Select(cs => cs.Series).ToList();
+
+                var weightedSeries = new List<ChannelSery>();
+
+                var channelSeries = channel.ChannelSeries.ToList();
+                foreach (var channelSeries1 in channelSeries) {
+                    for (var i = 0; i < channelSeries1.Weight; i++) {
+                        weightedSeries.Add(channelSeries1);
+                    }
+                }
+
+
+                var series = weightedSeries.Select(cs => cs.Series).ToList();
                 var pickedShow = series.ElementAt(rand.Next(series.Count()));
                 var pickedEpisode = pickedShow.Episodes.ElementAt(rand.Next(pickedShow.Episodes.Count));
 
@@ -167,6 +178,9 @@ namespace TvTuner.Controllers {
 
                 var dirs = Directory.GetDirectories(contentRoot);
                 var bestChance = dirs.FirstOrDefault(d => d.Contains(name)|| name.Contains(d));
+                if (name.ToLowerInvariant().Contains("game of thrones")) {
+                    bestChance = Server.MapPath("~/Content/Video/Game of Thrones");
+                }
                 if (bestChance == null) {
                     var directories = Directory.GetDirectories(Path.Combine(contentRoot, "HC"));
 

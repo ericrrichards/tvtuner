@@ -22,7 +22,7 @@
     <input type="hidden" id="epNo" value="@Model.EpisodeID"/>
     
     <h3>Season @Model.Season Episode @Model.EpisodeNumber - @Model.Name</h3>
-    <video width="640" height="480" controls="controls" autoplay="autoplay">
+    <video width="932" height="700" controls="controls" autoplay="autoplay">
         <source src="@Model.VideoPath" type="video/mp4"/>
     </video>
     <a href="@Url.Action("Show", new { id = Model.SeriesID })">

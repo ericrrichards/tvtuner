@@ -59,7 +59,7 @@ namespace TvTunerService.Infrastructure {
             var engineSettings = new EngineSettings(_downloadBasePath, port) {
                 PreferEncryption = false,
                 AllowedEncryption = EncryptionTypes.All,
-                GlobalMaxUploadSpeed = 3 * 1024
+                //GlobalMaxUploadSpeed = 3 * 1024
             };
 
             _engine = new ClientEngine(engineSettings);
@@ -115,6 +115,7 @@ namespace TvTunerService.Infrastructure {
         }
 
         public void AddMagnetLink(string magnet, string downloadPath) {
+            
             downloadPath = Path.Combine(_downloadBasePath, downloadPath);
             if (!Directory.Exists(downloadPath)) {
                 Directory.CreateDirectory(downloadPath);
@@ -137,8 +138,13 @@ namespace TvTunerService.Infrastructure {
 
             // Every time the state changes (Stopped -> Seeding -> Downloading -> Hashing) this is fired
             manager.TorrentStateChanged += delegate(object o, TorrentStateChangedEventArgs e) {
-                lock (_listener)
+                lock (_listener) {
                     _listener.WriteLine("OldState: " + e.OldState + " NewState: " + e.NewState);
+                }
+                if (e.NewState == TorrentState.Seeding) {
+                    manager.Stop();
+                    RemoveTorrent(manager);
+                }
             };
 
             // Every time the tracker's state changes, this is fired
@@ -149,6 +155,12 @@ namespace TvTunerService.Infrastructure {
             }
             // Start the torrentmanager. The file will then hash (if required) and begin downloading/seeding
             manager.Start();
+            Log.InfoFormat("Starting torrent {0}, downloading to {1}", magnetLink.Name, downloadPath);
+        }
+
+        private void RemoveTorrent(TorrentManager torrent) {
+            Log.Info("Removing torrent " + torrent.Torrent.Name);
+            _torrents.Remove(torrent);
         }
 
         private void ProcessLoop() {
@@ -180,6 +192,17 @@ namespace TvTunerService.Infrastructure {
                         //AppendFormat(sb, "Tracker Status:     {0}", tracker == null ? "<no tracker>" : tracker.State.ToString());
                         AppendFormat(sb, "Warning Message:    {0}", tracker == null ? "<no tracker>" : tracker.WarningMessage);
                         AppendFormat(sb, "Failure Message:    {0}", tracker == null ? "<no tracker>" : tracker.FailureMessage);
+
+                        if (manager.PieceManager != null) {
+                            AppendFormat(sb, "Current Requests:   {0}", manager.PieceManager.CurrentRequestCount());
+                        }
+
+                        foreach (PeerId p in manager.GetPeers()) {
+                            AppendFormat(sb, "\t{2} - {1:0.00}/{3:0.00}kB/sec - {0}", p.Connection.Uri,
+                                p.Monitor.DownloadSpeed / 1024.0,
+                                p.AmRequestingPiecesCount,
+                                p.Monitor.UploadSpeed / 1024.0);
+                        }
 
                         AppendFormat(sb, "", null);
                         if (manager.Torrent == null) { continue; }

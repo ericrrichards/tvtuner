@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Reflection;
 using log4net;
 using Nancy;
@@ -42,9 +43,27 @@ namespace TvTunerService.Modules {
             try {
                 var model = this.Bind<AddToLibraryModel>();
                 var sanitizedShowName = model.ShowName.Replace(" ", "_");
-                TorrentEngine.Instance.AddMagnetLink(model.MagnetLink, sanitizedShowName);
+                var filename = TorrentEngine.Instance.AddMagnetLink(model.MagnetLink, sanitizedShowName) + ".mp4";
 
-                return NancyUtils.JsonResponse("Success");
+                var show = ShowRepository.Instance[model.ShowName];
+                if (show == null) {
+                    ShowRepository.Instance.AddShow(new Show(model.ShowName));
+                    show = ShowRepository.Instance[model.ShowName];
+                }
+                if (!show.HasEpisode(filename)) {
+                    show.Episodes.Add(
+                        new Episode(show) {
+                            Title = Path.GetFileNameWithoutExtension(filename),
+                            SeasonNumber = model.Season,
+                            EpisodeNumber = model.EpisodeNumber,
+                            Filename = filename
+                        }
+                    );
+                }
+                ShowRepository.Instance.SaveData();
+
+
+                return NancyUtils.JsonResponse("Success " + filename);
             } catch (Exception ex) {
                 Log.Error("Exception in " + ex.TargetSite.Name, ex);
                 return NancyUtils.JsonResponse(ex.Message);
@@ -55,5 +74,7 @@ namespace TvTunerService.Modules {
     public class AddToLibraryModel {
         public string ShowName { get; set; }
         public string MagnetLink { get; set; }
+        public int Season { get; set; }
+        public int EpisodeNumber { get; set; }
     }
 }

@@ -12,6 +12,7 @@ using MonoTorrent;
 using MonoTorrent.BEncoding;
 using MonoTorrent.Client;
 using MonoTorrent.Client.Encryption;
+using MonoTorrent.Client.Tracker;
 using MonoTorrent.Common;
 using MonoTorrent.Dht;
 using MonoTorrent.Dht.Listeners;
@@ -75,7 +76,7 @@ namespace TvTunerService.Infrastructure {
             var dht = new DhtEngine(dhtListener);
             _engine.RegisterDht(dht);
             dhtListener.Start();
-            _engine.DhtEngine.Start(nodes);
+            _engine.DhtEngine.Start();
 
             if (!Directory.Exists(_engine.Settings.SavePath)) {
                 Directory.CreateDirectory(_engine.Settings.SavePath);
@@ -86,6 +87,7 @@ namespace TvTunerService.Infrastructure {
             } catch {
                 _fastResume = new BEncodedDictionary();
             }
+            
             _running = true;
             _loopThread = new Thread(ProcessLoop);
             _loopThread.Start();
@@ -114,7 +116,7 @@ namespace TvTunerService.Infrastructure {
             Thread.Sleep(2000);
         }
 
-        public void AddMagnetLink(string magnet, string downloadPath) {
+        public string AddMagnetLink(string magnet, string downloadPath) {
             
             downloadPath = Path.Combine(_downloadBasePath, downloadPath);
             if (!Directory.Exists(downloadPath)) {
@@ -156,6 +158,7 @@ namespace TvTunerService.Infrastructure {
             // Start the torrentmanager. The file will then hash (if required) and begin downloading/seeding
             manager.Start();
             Log.InfoFormat("Starting torrent {0}, downloading to {1}", magnetLink.Name, downloadPath);
+            return Path.Combine(downloadPath, magnetLink.Name);
         }
 
         private void RemoveTorrent(TorrentManager torrent) {

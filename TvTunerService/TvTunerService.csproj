@@ -79,6 +79,7 @@
   <ItemGroup>
     <Compile Include="Infrastructure\NancyUtils.cs" />
     <Compile Include="Infrastructure\RazorConfig.cs" />
+    <Compile Include="Infrastructure\ShowRepository.cs" />
     <Compile Include="Infrastructure\Startup.cs" />
     <Compile Include="Infrastructure\Top10Listener.cs" />
     <Compile Include="Infrastructure\TorrentEngine.cs" />
@@ -94,7 +95,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Content\fonts\glyphicons-halflings-regular.eot">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

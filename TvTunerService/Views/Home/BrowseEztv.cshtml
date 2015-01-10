@@ -1,0 +1,156 @@
+﻿@{
+    Layout = "Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-sm-6">
+        <div class =" input-group">
+            <input type="text" class="form-control" placeholder="Show title..." id="searchTerm"/>
+            <span class="input-group-btn">
+                <button class =" btn btn-default" type="button" id="SearchShows">Search</button>
+            </span>
+        </div>
+    </div>
+</div>
+<div id="ShowResults">
+    <div class="row">
+        <div class="col-sm-6">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th class="hidden">Show ID</th>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th></th> <!--Button column-->
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div id="EpisodeResults" style="display:none;">
+    <div class="row">
+        <div class="col-sm-6">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th class="hidden"></th>
+                        <th id="episodeShowTitle" colspan="2">Show Name</th>
+                        <th id="episodeCount" colspan="2"># Episodes</th>
+                    </tr>
+                    <tr>
+                        <th class="hidden">Episode ID</th>
+                        <th>Season</th>
+                        <th>Episode</th>
+                        <th>Title</th>
+                        <th></th> <!--button column to add to library-->
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $("#searchTerm").on("keypress", function(e) {
+            if (e.keyCode === 13) {
+                $("#SearchShows").click();
+            }
+        });
+
+        $("#EpisodeResults").on("click", ".addEpisode", function() {
+            spinner.spin(document.getElementById('EpisodeResults'));
+
+            var magnet = $(this).data("magnet");
+            var showName = $("#episodeShowTitle").text();
+
+            $.post(
+                getBaseURL() + "EZTV/AddToLibrary",
+                {
+                    ShowName: showName,
+                    MagnetLink: magnet 
+                },
+                function(data) {
+                    spinner.stop();
+                    if (data.indexOf("Success") > 0) {
+                        alert("success");
+                    } else {
+                        alert(data);
+                    }
+                }
+            );
+
+        });
+
+        $("#ShowResults").on("click", ".getShowBtn", function() {
+            console.log(this);
+            var id = $(this).parents("tr").find("td.showId").text();
+            console.log(id);
+            spinner.spin(document.getElementById('ShowResults'));
+            $("#EpisodeResults tbody").html("");
+            $.get(
+                getBaseURL()+"EZTV/GetEpisodes",
+                {
+                    showId:id
+                },
+                function(data) {
+                    $("#EpisodeResults #episodeShowTitle").text(data.ShowTitle);
+                    var length = data.Episodes.length;
+                    $("#EpisodeResults #episodeCount").text(length + " episodes");
+
+                    for (var i = 0; i < length; i++) {
+                        $("#EpisodeResults tbody").append(
+                            "<tr>" + 
+                                "<td class='episodeId hidden'>"+data.Episodes[i].ID + "</td>" +
+                                "<td class='episodeSeason'>" + data.Episodes[i].Season + "</td>"+
+                                "<td class='episodeNumber'>" + data.Episodes[i].EpisodeNum + "</td>"+ 
+                                "<td class='episodeTitle'>" + data.Episodes[i].Title + "</td>"+
+                                "<td><button type='button' class='btn btn-default addEpisode' data-magnet='"+data.Episodes[i].Magnet+"'>Add Episode</button></td>"+
+                            "</tr>"
+                        );
+                    }
+                    spinner.stop();
+                    $("#ShowResults").fadeOut(function () {
+                        $("#EpisodeResults").fadeIn();
+                    });
+                }
+            );
+
+            
+            
+        });
+
+        $("#SearchShows").on("click", function () {
+            $("#EpisodeResults").fadeOut(function() {
+                $("#ShowResults").fadeIn();
+            });
+            $("#ShowResults tbody").html("");
+            var fragment = $("#searchTerm").val();
+            spinner.spin(document.getElementById('ShowResults'));
+            $.get(
+                getBaseURL() + "EZTV/SearchShows",
+                {
+                    searchTerm: fragment
+                },
+                function (data) {
+                    spinner.stop();
+                    var tbody = $("#ShowResults tbody");
+                    
+                    var len = data.length;
+                    for (var i = 0; i < len; i++) {
+                        tbody.append("<tr>" +
+                            "<td class='showId hidden'>" + data[i].Id + "</td>" +
+                            "<td class='showTitle'>" + data[i].Title + "</td>" +
+                            "<td class='showStatus'>" + data[i].Status + "</td>" +
+                            "<td><button type='button' class='btn btn-default getShowBtn'>Get Episodes</button></td></tr>"
+                        );
+                    }
+                }
+            );
+        });
+    })
+
+</script>

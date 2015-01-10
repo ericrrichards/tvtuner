@@ -1,5 +1,5 @@
 ﻿namespace TvTunerService {
-    partial class Service1 {
+    partial class TvTunerSvc {
         /// <summary> 
         /// Required designer variable.
         /// </summary>

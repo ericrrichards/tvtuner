@@ -156,3 +156,4 @@ $RECYCLE.BIN/
 # Mac desktop service store files
 .DS_Store
 /packages/Newtonsoft.Json.5.0.8
+/packages

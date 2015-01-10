@@ -12,17 +12,18 @@ namespace TvTunerService {
         /// </summary>
         private static void Main(string[] args) {
             if (args.Length > 0) {
-                var svc = new Service1();
+                var svc = new TvTunerSvc();
                 svc.Start();
 
                 Console.WriteLine("Press enter to terminate...");
                 Console.ReadLine();
                 svc.End();
-
+                Console.WriteLine("Terminated, press enter to exit");
+                Console.ReadLine();
             }
             else {
                 var servicesToRun = new ServiceBase[] {
-                    new Service1()
+                    new TvTunerSvc()
                 };
                 ServiceBase.Run(servicesToRun);
             }

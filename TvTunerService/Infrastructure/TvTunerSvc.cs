@@ -38,6 +38,7 @@ namespace TvTunerService {
             Log.DebugFormat("Killing webhost on {0}", Url);
             _webhost.Dispose();
             _running = false;
+            ShowRepository.Instance.SaveData();
         }
 
         

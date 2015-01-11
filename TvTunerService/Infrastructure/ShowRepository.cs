@@ -55,6 +55,8 @@ namespace TvTunerService.Infrastructure {
 
         public int ID { get; set; }
         public string Name { get; set; }
+        public string Summary { get; set; }
+        public string BannerImg { get; set; }
         public List<Episode> Episodes { get; set; }
 
         private Show() {

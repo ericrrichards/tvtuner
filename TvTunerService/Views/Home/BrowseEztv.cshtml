@@ -4,10 +4,10 @@
 
 <div class="row">
     <div class="col-sm-6">
-        <div class =" input-group">
-            <input type="text" class="form-control" placeholder="Show title..." id="searchTerm"/>
+        <div class=" input-group">
+            <input type="text" class="form-control" placeholder="Show title..." id="searchTerm" />
             <span class="input-group-btn">
-                <button class =" btn btn-default" type="button" id="SearchShows">Search</button>
+                <button class=" btn btn-default" type="button" id="SearchShows">Search</button>
             </span>
         </div>
     </div>
@@ -52,16 +52,62 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="showModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Look up Show in TVDB</h4>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <label for="modalShowName">Show Name:</label>
+                    <div class="input-group">
+                        <input type="text" id="modalShowName" class="form-control" />
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="button" id="btnTVDBLookupShow">Lookup</button>
+                        </span>
+                    </div>
+                </div>
+                <img id="modalShowBanner" src="" />
+                <div id="modalShowSummary" class="well"></div>
+                
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 
 <script>
     $(function () {
-        $("#searchTerm").on("keypress", function(e) {
+        $("#btnTVDBLookupShow").on("click", function () {
+            var search = $("#modalShowName").val();
+            $.get(getBaseURL() + "tvdb/lookupshow/",
+                {
+                    search: search
+                }, function (data) {
+                    if (data.length == 1) {
+                        $.get(getBaseURL() + "tvdb/ShowInformation/" + data[0].Item2,
+                            function (data2) {
+                                $("#modalShowSummary").text(data2.Summary);
+                                $("#modalShowBanner").attr("src", getBaseURL() + data2.BannerPath);
+                            }
+                        );
+                    }
+                }
+            );
+        });
+
+        $("#searchTerm").on("keypress", function (e) {
             if (e.keyCode === 13) {
                 $("#SearchShows").click();
             }
         });
 
-        $("#EpisodeResults").on("click", ".addEpisode", function() {
+        $("#EpisodeResults").on("click", ".addEpisode", function () {
             spinner.spin(document.getElementById('EpisodeResults'));
 
             var magnet = $(this).data("magnet");
@@ -69,18 +115,22 @@
             var season = $(this).parents("tr").find(".episodeSeason").text();
             var episodeNum = $(this).parents("tr").find(".episodeNumber").text();
 
+
+
             $.post(
                 getBaseURL() + "EZTV/AddToLibrary",
                 {
                     ShowName: showName,
                     MagnetLink: magnet,
-                    Season :season,
-                    EpisodeNumber : episodeNum
+                    Season: season,
+                    EpisodeNumber: episodeNum
                 },
-                function(data) {
+                function (data) {
                     spinner.stop();
-                    if (data.indexOf("Success") > 0) {
-                        alert(data);
+                    if (data.indexOf("Success") >= 0) {
+                        //alert(data);
+                        $("#modalShowName").val(showName);
+                        $("#showModal").modal();
                     } else {
                         alert(data);
                     }
@@ -89,30 +139,30 @@
 
         });
 
-        $("#ShowResults").on("click", ".getShowBtn", function() {
+        $("#ShowResults").on("click", ".getShowBtn", function () {
             console.log(this);
             var id = $(this).parents("tr").find("td.showId").text();
             console.log(id);
             spinner.spin(document.getElementById('ShowResults'));
             $("#EpisodeResults tbody").html("");
             $.get(
-                getBaseURL()+"EZTV/GetEpisodes",
+                getBaseURL() + "EZTV/GetEpisodes",
                 {
-                    showId:id
+                    showId: id
                 },
-                function(data) {
+                function (data) {
                     $("#EpisodeResults #episodeShowTitle").text(data.ShowTitle);
                     var length = data.Episodes.length;
                     $("#EpisodeResults #episodeCount").text(length + " episodes");
 
                     for (var i = 0; i < length; i++) {
                         $("#EpisodeResults tbody").append(
-                            "<tr>" + 
-                                "<td class='episodeId hidden'>"+data.Episodes[i].ID + "</td>" +
-                                "<td class='episodeSeason'>" + data.Episodes[i].Season + "</td>"+
-                                "<td class='episodeNumber'>" + data.Episodes[i].EpisodeNum + "</td>"+ 
-                                "<td class='episodeTitle'>" + data.Episodes[i].Title + "</td>"+
-                                "<td><button type='button' class='btn btn-default addEpisode' data-magnet='"+data.Episodes[i].Magnet+"'>Add Episode</button></td>"+
+                            "<tr>" +
+                                "<td class='episodeId hidden'>" + data.Episodes[i].ID + "</td>" +
+                                "<td class='episodeSeason'>" + data.Episodes[i].Season + "</td>" +
+                                "<td class='episodeNumber'>" + data.Episodes[i].EpisodeNum + "</td>" +
+                                "<td class='episodeTitle'>" + data.Episodes[i].Title + "</td>" +
+                                "<td><button type='button' class='btn btn-default addEpisode' data-magnet='" + data.Episodes[i].Magnet + "'>Add Episode</button></td>" +
                             "</tr>"
                         );
                     }
@@ -123,12 +173,12 @@
                 }
             );
 
-            
-            
+
+
         });
 
         $("#SearchShows").on("click", function () {
-            $("#EpisodeResults").fadeOut(function() {
+            $("#EpisodeResults").fadeOut(function () {
                 $("#ShowResults").fadeIn();
             });
             $("#ShowResults tbody").html("");
@@ -142,7 +192,7 @@
                 function (data) {
                     spinner.stop();
                     var tbody = $("#ShowResults tbody");
-                    
+
                     var len = data.length;
                     for (var i = 0; i < len; i++) {
                         tbody.append("<tr>" +

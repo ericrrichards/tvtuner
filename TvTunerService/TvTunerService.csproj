@@ -65,6 +65,8 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Web.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
       <HintPath>..\packages\Microsoft.AspNet.Razor.2.0.30506.0\lib\net40\System.Web.Razor.dll</HintPath>
@@ -91,6 +93,7 @@
     <Compile Include="Models\ModelBase.cs" />
     <Compile Include="Models\AddToLibraryModel.cs" />
     <Compile Include="Modules\HomeModule.cs" />
+    <Compile Include="Modules\TvDbModule.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -148,7 +151,7 @@
     <None Include="web.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Content\images\" />
+    <Folder Include="Content\images\showBanners\" />
     <Folder Include="Data\" />
   </ItemGroup>
   <ItemGroup>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using log4net;
 using Nancy;
@@ -15,13 +16,15 @@ namespace TvTunerService.Modules {
             Get["/"] = Index;
             Get["/BrowseEZTV"] = BrowseEZTV;
             Get["/Shows/"] = Shows;
+            Get["/Shows/Show/{id}"] = Show;
+            Get["/Show/Watch/{id}"] = WatchEpisode;
 
             Get["/EZTV/SearchShows"] = SearchEZTVShows;
             Get["/EZTV/GetEpisodes"] = GetEpisodes;
             Post["/EZTV/AddToLibrary"] = AddToLibrary;
             
         }
-
+        
         private dynamic Index(dynamic parameters) {
             return View["Views/Home/Index", new ModelBase(Context)];
         }
@@ -30,6 +33,16 @@ namespace TvTunerService.Modules {
         }
         private dynamic Shows(dynamic parameters) {
             return View["Views/Shows/Index", new ShowIndexModel(Context, ShowRepository.Instance.Shows)];
+        }
+        private dynamic Show(dynamic parameters) {
+            int id = parameters.id;
+            return View["Views/Shows/Show", new ShowModel(Context, ShowRepository.Instance[id])];
+        }
+        private dynamic WatchEpisode(dynamic parameters) {
+            int id = parameters.id;
+            var episodeModel = new EpisodeModel(Context, ShowRepository.Instance.Episodes.First(e=>e.ID == id));
+            episodeModel.Episode.Filename = "/" + TvTunerSvc.siteRoot + "/" + episodeModel.Episode.Filename;
+            return View["Views/Shows/Watch", episodeModel];
         }
         private dynamic SearchEZTVShows(dynamic parameters) {
             string searchFragment = Request.Query["searchTerm"];

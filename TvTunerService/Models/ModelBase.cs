@@ -26,4 +26,18 @@ namespace TvTunerService.Models {
             Shows = shows;
         }
     }
+    public class ShowModel : ModelBase {
+        public Show Show { get; set; }
+        public ShowModel(NancyContext context, Show show)
+            : base(context) {
+            Show = show;
+        }
+    }
+    public class EpisodeModel : ModelBase {
+        public Episode Episode { get; set; }
+        public EpisodeModel(NancyContext context, Episode episode)
+            : base(context) {
+            Episode = episode;
+        }
+    }
 }

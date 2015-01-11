@@ -1,6 +1,8 @@
 using System.Net;
 using System.Reflection;
 using log4net;
+using Nancy;
+using Nancy.Conventions;
 using Owin;
 
 namespace TvTunerService {
@@ -12,6 +14,15 @@ namespace TvTunerService {
             listener.AuthenticationSchemes = AuthenticationSchemes.IntegratedWindowsAuthentication;
             
             app.UseNancy();
+        }
+    }
+    public class Bootstrapper : DefaultNancyBootstrapper {
+        protected override void ConfigureConventions(NancyConventions nancyConventions) {
+            base.ConfigureConventions(nancyConventions);
+
+            nancyConventions.StaticContentsConventions.Add(
+                StaticContentConventionBuilder.AddDirectory("/videos")
+            );
         }
     }
 }

@@ -1,0 +1,11 @@
+﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<TvTunerService.Models.EpisodeModel>
+
+@{
+    Layout = "Views/Shared/_Layout.cshtml";
+}
+
+<h3>Season @Model.Episode.SeasonNumber Episode @Model.Episode.EpisodeNumber - @Model.Episode.Title</h3>
+
+<video width="932" height="700" controls="controls" autoplay="autoplay">
+    <source src="@Model.Episode.Filename" type="video/mp4" />
+</video>

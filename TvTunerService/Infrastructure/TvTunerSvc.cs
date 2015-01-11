@@ -12,7 +12,8 @@ namespace TvTunerService {
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
         private IDisposable _webhost;
-        private const string Url = "http://+/TvTuner";
+        public const string siteRoot = "TvTuner";
+        private const string Url = "http://+/" + siteRoot;
         private static bool _running;
 
         public TvTunerSvc() {

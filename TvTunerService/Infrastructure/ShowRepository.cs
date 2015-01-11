@@ -42,6 +42,9 @@ namespace TvTunerService.Infrastructure {
         public Show this[string name] {
             get { return Shows.FirstOrDefault(s => s.Name == name); }
         }
+        public Show this[int id] {
+            get { return Shows.FirstOrDefault(s => s.ID == id); }
+        }
         public void AddShow(Show s) {
             Shows.Add(s);
         }

@@ -66,8 +66,8 @@
 
             var magnet = $(this).data("magnet");
             var showName = $("#episodeShowTitle").text();
-            var season = $(this).parent("tr").find(".episodeSeason").text();
-            var episodeNum = $(this).parent("tr").find(".episodeNumber").text();
+            var season = $(this).parents("tr").find(".episodeSeason").text();
+            var episodeNum = $(this).parents("tr").find(".episodeNumber").text();
 
             $.post(
                 getBaseURL() + "EZTV/AddToLibrary",

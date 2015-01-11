@@ -81,7 +81,6 @@
     <Compile Include="Infrastructure\RazorConfig.cs" />
     <Compile Include="Infrastructure\ShowRepository.cs" />
     <Compile Include="Infrastructure\Startup.cs" />
-    <Compile Include="Infrastructure\Top10Listener.cs" />
     <Compile Include="Infrastructure\TorrentEngine.cs" />
     <Compile Include="Infrastructure\TvTunerSvc.cs">
       <SubType>Component</SubType>
@@ -90,8 +89,10 @@
       <DependentUpon>TvTunerSvc.cs</DependentUpon>
     </Compile>
     <Compile Include="Models\ModelBase.cs" />
+    <Compile Include="Models\AddToLibraryModel.cs" />
     <Compile Include="Modules\HomeModule.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -123,6 +124,9 @@
     <Content Include="Content\JS\Lib\spin.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Infrastructure\aria2c.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Views\Shared\_Layout.cshtml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -130,6 +134,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Views\Home\Index.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Views\Shows\Index.cshtml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="web.config" />
@@ -142,10 +149,6 @@
     <ProjectReference Include="..\..\EZTVLib.NET\EZTV\EZTV.csproj">
       <Project>{A0847B2B-3804-4CCB-9FE5-8AEB5D724CA5}</Project>
       <Name>EZTV</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\monotorrent\src\MonoTorrent.Dht\MonoTorrent.Dht.csproj">
-      <Project>{7A2A7E73-FD43-4171-AA34-DA413D35459E}</Project>
-      <Name>MonoTorrent.Dht</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\monotorrent\src\MonoTorrent\MonoTorrent.csproj">
       <Project>{411A9E0E-FDC6-4E25-828A-0C2CD1CD96F8}</Project>

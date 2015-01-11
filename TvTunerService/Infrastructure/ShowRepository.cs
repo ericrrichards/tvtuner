@@ -9,7 +9,11 @@ using System.Xml.Linq;
 
 namespace TvTunerService.Infrastructure {
     class ShowRepository {
-        private List<Show> Shows { get; set; }
+        internal List<Show> Shows { get; set; }
+
+        public List<Episode> Episodes {
+            get { return Shows.SelectMany(s => s.Episodes).ToList(); }
+        }
 
         private static readonly ShowRepository _instance = new ShowRepository();
         public static ShowRepository Instance { get { return _instance; } }
@@ -41,10 +45,6 @@ namespace TvTunerService.Infrastructure {
         public void AddShow(Show s) {
             Shows.Add(s);
         }
-
-
-
-
     }
 
     public class Show {
@@ -116,6 +116,9 @@ namespace TvTunerService.Infrastructure {
                 EpisodeNumber = Convert.ToInt32(xElement.Descendants("episodeNumber").First().Value),
                 Filename = xElement.Descendants("filename").First().Value
             };
+            if (ret.ID >= _nextID) {
+                _nextID = ret.ID + 1;
+            }
             return ret;
         }
 

@@ -14,9 +14,12 @@ namespace TvTunerService.Modules {
         public HomeModule() {
             Get["/"] = Index;
             Get["/BrowseEZTV"] = BrowseEZTV;
+            Get["/Shows/"] = Shows;
+
             Get["/EZTV/SearchShows"] = SearchEZTVShows;
             Get["/EZTV/GetEpisodes"] = GetEpisodes;
             Post["/EZTV/AddToLibrary"] = AddToLibrary;
+            
         }
 
         private dynamic Index(dynamic parameters) {
@@ -24,6 +27,9 @@ namespace TvTunerService.Modules {
         }
         private dynamic BrowseEZTV(dynamic parameters) {
             return View["Views/Home/BrowseEztv", new ModelBase(Context)];
+        }
+        private dynamic Shows(dynamic parameters) {
+            return View["Views/Shows/Index", new ShowIndexModel(Context, ShowRepository.Instance.Shows)];
         }
         private dynamic SearchEZTVShows(dynamic parameters) {
             string searchFragment = Request.Query["searchTerm"];
@@ -69,12 +75,5 @@ namespace TvTunerService.Modules {
                 return NancyUtils.JsonResponse(ex.Message);
             }
         }
-    }
-
-    public class AddToLibraryModel {
-        public string ShowName { get; set; }
-        public string MagnetLink { get; set; }
-        public int Season { get; set; }
-        public int EpisodeNumber { get; set; }
     }
 }

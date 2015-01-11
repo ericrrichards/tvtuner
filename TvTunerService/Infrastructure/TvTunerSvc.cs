@@ -32,10 +32,8 @@ namespace TvTunerService {
             Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
             _webhost = WebApp.Start<Startup>(Url);
             Log.Debug("Started on " + Url);
-            TorrentEngine.Instance.StartEngine();
         }
         public void End() {
-            TorrentEngine.Instance.StopEngine();
             Log.DebugFormat("Killing webhost on {0}", Url);
             _webhost.Dispose();
             _running = false;

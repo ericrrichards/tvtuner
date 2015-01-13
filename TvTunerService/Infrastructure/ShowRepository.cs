@@ -73,9 +73,13 @@ namespace TvTunerService.Infrastructure {
         }
 
         public static Show Parse(XElement show) {
+            var summaryElem = show.Descendants("summary").FirstOrDefault();
+            var bannerElem = show.Descendants("bannerImg").FirstOrDefault();
             var ret = new Show {
                 ID = Convert.ToInt32(show.Descendants("id").First().Value),
                 Name = show.Descendants("name").First().Value,
+                Summary = summaryElem != null ? summaryElem.Value : "",
+                BannerImg = bannerElem != null ? bannerElem.Value : "",
                 Episodes = show.Descendants("episode").Select(Episode.Parse).ToList()
             };
             foreach (var episode in ret.Episodes) {
@@ -92,6 +96,8 @@ namespace TvTunerService.Infrastructure {
             return new XElement("show", 
                 new XElement("id", ID),
                 new XElement("name", Name),
+                new XElement("summary", Summary),
+                new XElement("bannerImg", BannerImg),
                 new XElement("episodes", Episodes.Select(e=>e.ToXml()))
             );
         }

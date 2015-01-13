@@ -22,7 +22,9 @@ namespace TvTunerService.Modules {
             Get["/EZTV/SearchShows"] = SearchEZTVShows;
             Get["/EZTV/GetEpisodes"] = GetEpisodes;
             Post["/EZTV/AddToLibrary"] = AddToLibrary;
-            
+
+            Post["shows/show/update/{ShowName}"] = UpdateShow;
+
         }
         
         private dynamic Index(dynamic parameters) {
@@ -83,6 +85,27 @@ namespace TvTunerService.Modules {
 
 
                 return NancyUtils.JsonResponse("Success " + filename);
+            } catch (Exception ex) {
+                Log.Error("Exception in " + ex.TargetSite.Name, ex);
+                return NancyUtils.JsonResponse(ex.Message);
+            }
+        }
+
+        private dynamic UpdateShow(dynamic parameters) {
+            try {
+                var model = this.Bind<UpdateShowModel>();
+
+                Show show = ShowRepository.Instance[parameters.ShowName.ToString()];
+                show.Summary = model.Summary;
+                var bannerUrl = model.BannerUrl;
+                var index = bannerUrl.IndexOf("/Content/");
+
+
+                show.BannerImg = "~"+bannerUrl.Substring(index);
+
+                ShowRepository.Instance.SaveData();
+
+                return NancyUtils.JsonResponse("Success");
             } catch (Exception ex) {
                 Log.Error("Exception in " + ex.TargetSite.Name, ex);
                 return NancyUtils.JsonResponse(ex.Message);

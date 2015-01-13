@@ -71,7 +71,7 @@
                 </div>
                 <img id="modalShowBanner" src="" />
                 <div id="modalShowSummary" class="well"></div>
-                
+                <button type="button" class="btn btn-primary" id="btnSaveShow" style="display: none">Save Show Info</button>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -83,6 +83,24 @@
 
 <script>
     $(function () {
+        $("#btnSaveShow").on("click", function() {
+            var showName = $("#modalShowName").val();
+            var summary = $("#modalShowSummary").text();
+            var bannerUrl = $("#modalShowBanner").attr("src");
+
+            $.post(
+                getBaseURL() + "shows/show/update/" + showName,
+                {
+                    ShowName: showName,
+                    Summary: summary,
+                    BannerUrl : bannerUrl
+                },
+                function (data) {
+                    alert(data);
+                }
+            );
+        });
+
         $("#btnTVDBLookupShow").on("click", function () {
             var search = $("#modalShowName").val();
             $.get(getBaseURL() + "tvdb/lookupshow/",
@@ -92,8 +110,10 @@
                     if (data.length == 1) {
                         $.get(getBaseURL() + "tvdb/ShowInformation/" + data[0].Item2,
                             function (data2) {
+                                $("#modalShowName").val(data2.Name);
                                 $("#modalShowSummary").text(data2.Summary);
                                 $("#modalShowBanner").attr("src", getBaseURL() + data2.BannerPath);
+                                $("#btnSaveShow").show();
                             }
                         );
                     }

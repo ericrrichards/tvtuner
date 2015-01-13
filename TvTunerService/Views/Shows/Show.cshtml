@@ -4,10 +4,20 @@
     Layout = "Views/Shared/_Layout.cshtml";
 }
 
-<h2>@Model.Show.Name</h2>
 
-<ul>
-    @foreach (var episode in Model.Show.Episodes) {
-        <li><a href="~/Show/Watch/@episode.ID">@episode.Title</a></li>
-    }
-</ul>
+<div class="row">
+    <div class="col-sm-12">
+        <h2>@Model.Show.Name</h2>
+        <img src="@Url.Content(Model.Show.BannerImg)" />
+        <div style="max-width: 758px">
+            <div class="well">@Model.Show.Summary</div>
+
+            <ul>
+                @foreach (var episode in Model.Show.Episodes) {
+                    <li><a href="~/Show/Watch/@episode.ID">@episode.Title</a></li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+

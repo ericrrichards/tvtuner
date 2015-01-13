@@ -11,11 +11,16 @@ namespace TvTunerService.Modules {
     public class TvDbModule : NancyModule{
         public const string ApiKey = "645AAFA61BE26C3C";
         private const string ShowBannerDir = "Content/images/showBanners";
+        private const string ShowXmlCacheDir = "ShowXml";
 
         public TvDbModule() {
             if (!Directory.Exists(ShowBannerDir)) {
                 Directory.CreateDirectory(ShowBannerDir);
             }
+            if (!Directory.Exists(ShowXmlCacheDir)) {
+                Directory.CreateDirectory(ShowXmlCacheDir);
+            }
+
             Get["/TvDb/LookupShow"] = LookupShow;
             Get["/TvDb/ShowInformation/{id}"] = ShowInformation;
         }
@@ -42,15 +47,18 @@ namespace TvTunerService.Modules {
         private dynamic ShowInformation(dynamic parameters) {
             var id = parameters.id;
             using (var wc = new WebClient()) {
-                var address = string.Format("http://thetvdb.com/api/{0}/series/{1}/all/en.zip", ApiKey, id);
-                var tempPath = Path.GetTempFileName();
+                var tempPath = Path.Combine(ShowXmlCacheDir, id + ".zip");
+                if (!File.Exists(tempPath)) {
 
-                wc.DownloadFile(address, tempPath);
+                    var address = string.Format("http://thetvdb.com/api/{0}/series/{1}/all/en.zip", ApiKey, id);
 
+
+                    wc.DownloadFile(address, tempPath);
+                }
                 var zip = ZipFile.Open(tempPath, ZipArchiveMode.Read);
 
                 var seriesXml = zip.GetEntry("en.xml");
-                var xml = XDocument.Load(seriesXml.Open());
+                XDocument xml = XDocument.Load(seriesXml.Open());
 
                 var series = xml.Descendants("Series").FirstOrDefault();
                 if (series != null) {

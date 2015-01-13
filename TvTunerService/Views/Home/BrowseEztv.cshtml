@@ -60,18 +60,61 @@
                 <h4 class="modal-title">Look up Show in TVDB</h4>
             </div>
             <div class="modal-body">
-                <div>
-                    <label for="modalShowName">Show Name:</label>
-                    <div class="input-group">
-                        <input type="text" id="modalShowName" class="form-control" />
-                        <span class="input-group-btn">
-                            <button class="btn btn-default" type="button" id="btnTVDBLookupShow">Lookup</button>
-                        </span>
+                <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="headingOne">
+                            <h4 class="panel-title">
+                                <a data-toggle="collapse" data-parent="#accordion" href="#showInformation" aria-expanded="true" aria-controls="collapseOne">
+                                    Show Information
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="showInformation" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                            <div class="panel-body">
+                                <div>
+                                    <label for="modalShowName">Show Name:</label>
+                                    <div class="input-group">
+                                        <input type="text" id="modalShowName" class="form-control" />
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="button" id="btnTVDBLookupShow">Lookup</button>
+                                        </span>
+                                    </div>
+                                </div>
+                                <img id="modalShowBanner" src="" />
+                                <div id="modalShowSummary" class="well"></div>
+                                <button type="button" class="btn btn-primary" id="btnSaveShow" style="display: none">Save Show Info</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="headingOne">
+                            <h4 class="panel-title">
+                                <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#episodeInformation" aria-expanded="true" aria-controls="collapseOne">
+                                    Episode Information
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="episodeInformation" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                            <div class="panel-body">
+                                <div class="form-horizontal">
+                                    <div class="form-group">
+                                        <label for="modalEpisodeSeason" class="col-sm-2 control-label">Season</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" id="modalEpisodeSeason" class="form-control" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="modalEpisodeNum" class="col-sm-2 control-label">Episode</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" id="modalEpisodeNum" class="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-primary" id="btnSaveEpisode" style="display: none">Save Episode Info</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <img id="modalShowBanner" src="" />
-                <div id="modalShowSummary" class="well"></div>
-                <button type="button" class="btn btn-primary" id="btnSaveShow" style="display: none">Save Show Info</button>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -82,34 +125,41 @@
 </div><!-- /.modal -->
 
 <script>
-    $(function () {
+    $(function() {
         $("#btnSaveShow").on("click", function() {
             var showName = $("#modalShowName").val();
             var summary = $("#modalShowSummary").text();
             var bannerUrl = $("#modalShowBanner").attr("src");
+
 
             $.post(
                 getBaseURL() + "shows/show/update/" + showName,
                 {
                     ShowName: showName,
                     Summary: summary,
-                    BannerUrl : bannerUrl
+                    BannerUrl: bannerUrl
                 },
-                function (data) {
-                    alert(data);
+                function(data) {
+
+                    $("#btnSaveShow").parent().append(
+                        '<div class="alert alert-success alert-dismissible fade in" role="alert">' +
+                        '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>' + data + '</div>'
+                    );
                 }
             );
         });
 
-        $("#btnTVDBLookupShow").on("click", function () {
+        $("#btnTVDBLookupShow").on("click", function() {
             var search = $("#modalShowName").val();
+            spinner.spin(document.getElementsByClassName('modal-body'));
             $.get(getBaseURL() + "tvdb/lookupshow/",
                 {
                     search: search
-                }, function (data) {
+                }, function(data) {
                     if (data.length == 1) {
                         $.get(getBaseURL() + "tvdb/ShowInformation/" + data[0].Item2,
                             function (data2) {
+                                spinner.stop();
                                 $("#modalShowName").val(data2.Name);
                                 $("#modalShowSummary").text(data2.Summary);
                                 $("#modalShowBanner").attr("src", getBaseURL() + data2.BannerPath);
@@ -121,20 +171,19 @@
             );
         });
 
-        $("#searchTerm").on("keypress", function (e) {
+        $("#searchTerm").on("keypress", function(e) {
             if (e.keyCode === 13) {
                 $("#SearchShows").click();
             }
         });
 
-        $("#EpisodeResults").on("click", ".addEpisode", function () {
+        $("#EpisodeResults").on("click", ".addEpisode", function() {
             spinner.spin(document.getElementById('EpisodeResults'));
-
+            ClearModal();
             var magnet = $(this).data("magnet");
             var showName = $("#episodeShowTitle").text();
             var season = $(this).parents("tr").find(".episodeSeason").text();
             var episodeNum = $(this).parents("tr").find(".episodeNumber").text();
-
 
 
             $.post(
@@ -145,11 +194,13 @@
                     Season: season,
                     EpisodeNumber: episodeNum
                 },
-                function (data) {
+                function(data) {
                     spinner.stop();
                     if (data.indexOf("Success") >= 0) {
                         //alert(data);
                         $("#modalShowName").val(showName);
+                        $("#modalEpisodeSeason").val(season);
+                        $("#modalEpisodeNum").val(episodeNum);
                         $("#showModal").modal();
                     } else {
                         alert(data);
@@ -159,7 +210,7 @@
 
         });
 
-        $("#ShowResults").on("click", ".getShowBtn", function () {
+        $("#ShowResults").on("click", ".getShowBtn", function() {
             console.log(this);
             var id = $(this).parents("tr").find("td.showId").text();
             console.log(id);
@@ -170,7 +221,7 @@
                 {
                     showId: id
                 },
-                function (data) {
+                function(data) {
                     $("#EpisodeResults #episodeShowTitle").text(data.ShowTitle);
                     var length = data.Episodes.length;
                     $("#EpisodeResults #episodeCount").text(length + " episodes");
@@ -178,27 +229,26 @@
                     for (var i = 0; i < length; i++) {
                         $("#EpisodeResults tbody").append(
                             "<tr>" +
-                                "<td class='episodeId hidden'>" + data.Episodes[i].ID + "</td>" +
-                                "<td class='episodeSeason'>" + data.Episodes[i].Season + "</td>" +
-                                "<td class='episodeNumber'>" + data.Episodes[i].EpisodeNum + "</td>" +
-                                "<td class='episodeTitle'>" + data.Episodes[i].Title + "</td>" +
-                                "<td><button type='button' class='btn btn-default addEpisode' data-magnet='" + data.Episodes[i].Magnet + "'>Add Episode</button></td>" +
+                            "<td class='episodeId hidden'>" + data.Episodes[i].ID + "</td>" +
+                            "<td class='episodeSeason'>" + data.Episodes[i].Season + "</td>" +
+                            "<td class='episodeNumber'>" + data.Episodes[i].EpisodeNum + "</td>" +
+                            "<td class='episodeTitle'>" + data.Episodes[i].Title + "</td>" +
+                            "<td><button type='button' class='btn btn-default addEpisode' data-magnet='" + data.Episodes[i].Magnet + "'>Add Episode</button></td>" +
                             "</tr>"
                         );
                     }
                     spinner.stop();
-                    $("#ShowResults").fadeOut(function () {
+                    $("#ShowResults").fadeOut(function() {
                         $("#EpisodeResults").fadeIn();
                     });
                 }
             );
 
 
-
         });
 
-        $("#SearchShows").on("click", function () {
-            $("#EpisodeResults").fadeOut(function () {
+        $("#SearchShows").on("click", function() {
+            $("#EpisodeResults").fadeOut(function() {
                 $("#ShowResults").fadeIn();
             });
             $("#ShowResults tbody").html("");
@@ -209,7 +259,7 @@
                 {
                     searchTerm: fragment
                 },
-                function (data) {
+                function(data) {
                     spinner.stop();
                     var tbody = $("#ShowResults tbody");
 
@@ -225,6 +275,14 @@
                 }
             );
         });
-    })
+    });
+    function ClearModal() {
+        $("#modalShowName").val('');
+        $("#modalShowBanner").attr('src', '');
+        $("#modalShowSummary").text('');
+        $("#btnSaveShow").hide();
+        $("#modalEpisodeSeason").val('');
+        $("#modalEpisodeNum").val('');
+    }
 
 </script>

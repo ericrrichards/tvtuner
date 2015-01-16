@@ -5,6 +5,7 @@ using System.Security;
 using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
+using EZTV;
 using Nancy;
 using TvTunerService.Infrastructure;
 
@@ -47,5 +48,12 @@ namespace TvTunerService.Models {
         public string Summary { get; set; }
         public string BannerUrl { get; set; }
     }
-        
+
+    public class BrowseEztvModel : ModelBase {
+        public List<EZTVShow> Shows { get; set; }
+        public EZTVEpisodeList Episodes { get; set; }
+
+        public BrowseEztvModel(NancyContext context):base(context) {
+        }
+    }
 }

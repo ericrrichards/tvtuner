@@ -1,4 +1,5 @@
-﻿@{
+﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<TvTunerService.Models.BrowseEztvModel>
+@{
     Layout = "Views/Shared/_Layout.cshtml";
 }
 
@@ -12,7 +13,13 @@
         </div>
     </div>
 </div>
-<div id="ShowResults">
+
+@{
+    var showResultsStyle = (Model.Episodes != null) ? "display:none;" : "";
+    var showEpisodesStyle = (Model.Episodes != null) ? "" : "display:none;";
+}
+
+<div id="ShowResults" style="@showResultsStyle">
     <div class="row">
         <div class="col-sm-6">
             <table class="table table-striped table-hover">
@@ -24,20 +31,30 @@
                         <th></th> <!--Button column-->
                     </tr>
                 </thead>
-                <tbody></tbody>
+                <tbody>
+                    @foreach (var show in Model.Shows) {
+                        <tr>
+                            <td class='showId hidden'>@show.Id</td>
+                            <td class='showTitle'> @show.Title</td>
+                            <td class='showStatus'>@show.Status</td>
+                            <td><button type='button' class='btn btn-default getShowBtn'>Get Episodes</button></td>
+                        </tr>
+                    }
+
+                </tbody>
             </table>
         </div>
     </div>
 </div>
-<div id="EpisodeResults" style="display:none;">
+<div id="EpisodeResults" style="@showEpisodesStyle">
     <div class="row">
         <div class="col-sm-6">
             <table class="table table-striped table-hover">
                 <thead>
                     <tr>
                         <th class="hidden"></th>
-                        <th id="episodeShowTitle" colspan="2">Show Name</th>
-                        <th id="episodeCount" colspan="2"># Episodes</th>
+                        <th id="episodeShowTitle" colspan="2">@(Model.Episodes != null ? Model.Episodes.ShowTitle : "Show Name")</th>
+                        <th id="episodeCount" colspan="2">@(Model.Episodes != null ? Model.Episodes.Episodes.Count : 0) Episodes</th>
                     </tr>
                     <tr>
                         <th class="hidden">Episode ID</th>
@@ -47,12 +64,25 @@
                         <th></th> <!--button column to add to library-->
                     </tr>
                 </thead>
-                <tbody></tbody>
+                <tbody>
+                    @if (Model.Episodes != null) {
+                        foreach (var episode in Model.Episodes.Episodes) {
+                            <tr>
+                                <td class='episodeId hidden'>@episode.ID</td>
+                                <td class='episodeSeason'>@episode.Season</td>
+                                <td class='episodeNumber'>@episode.EpisodeNum</td>
+                                <td class='episodeTitle'>@episode.Title </td>
+                                <td><button type='button' class='btn btn-default addEpisode' data-magnet='@episode.Magnet'>Add Episode</button></td>
+                            </tr>
+                        }
+                    }
+                </tbody>
             </table>
         </div>
     </div>
 </div>
 <div class="modal fade" id="showModal">
+    <input type="hidden" id="originalShowName" />
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -79,6 +109,7 @@
                                             <button class="btn btn-default" type="button" id="btnTVDBLookupShow">Lookup</button>
                                         </span>
                                     </div>
+                                    <select id="modalPickShow" size="5" style="display:none"></select>
                                 </div>
                                 <img id="modalShowBanner" src="" />
                                 <div id="modalShowSummary" class="well"></div>
@@ -110,7 +141,6 @@
                                         </div>
                                     </div>
                                 </div>
-                                <button type="button" class="btn btn-primary" id="btnSaveEpisode" style="display: none">Save Episode Info</button>
                             </div>
                         </div>
                     </div>
@@ -118,15 +148,15 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
+                <button type="button" class="btn btn-primary" id="btnSaveEpisode">Save changes</button>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
 <script>
-    $(function() {
-        $("#btnSaveShow").on("click", function() {
+    $(function () {
+        $("#btnSaveEpisode").on("click", function () {
             var showName = $("#modalShowName").val();
             var summary = $("#modalShowSummary").text();
             var bannerUrl = $("#modalShowBanner").attr("src");
@@ -139,24 +169,42 @@
                     Summary: summary,
                     BannerUrl: bannerUrl
                 },
-                function(data) {
-
-                    $("#btnSaveShow").parent().append(
-                        '<div class="alert alert-success alert-dismissible fade in" role="alert">' +
-                        '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>' + data + '</div>'
-                    );
+                function (data) {
+                    if (data === "Success") {
+                        $("#showModal").modal('hide');
+                    } else {
+                        $("#btnSaveShow").parent().append(
+                            '<div class="alert alert-success alert-dismissible fade in" role="alert">' +
+                            '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>' + data + '</div>'
+                        );
+                    }
                 }
             );
         });
 
-        $("#btnTVDBLookupShow").on("click", function() {
+        $("#modalPickShow").on("click", "option", function () {
+            $.get(getBaseURL() + "tvdb/ShowInformation/" + $(this).val(),
+                function (data2) {
+                    spinner.stop();
+                    $("#modalShowName").val(data2.Name);
+                    $("#modalShowSummary").text(data2.Summary);
+                    $("#modalShowBanner").attr("src", getBaseURL() + data2.BannerPath);
+                    $("#btnSaveShow").show();
+                }
+            );
+        });
+
+        $("#btnTVDBLookupShow").on("click", function () {
             var search = $("#modalShowName").val();
-            spinner.spin(document.getElementsByClassName('modal-body'));
+            spinner.spin(document.getElementById('showModal'));
+            var lb = $("#modalPickShow");
+            lb.html('');
             $.get(getBaseURL() + "tvdb/lookupshow/",
                 {
                     search: search
-                }, function(data) {
+                }, function (data) {
                     if (data.length == 1) {
+                        lb.hide();
                         $.get(getBaseURL() + "tvdb/ShowInformation/" + data[0].Item2,
                             function (data2) {
                                 spinner.stop();
@@ -166,18 +214,19 @@
                                 $("#btnSaveShow").show();
                             }
                         );
+                    } else if (data.length > 1) {
+                        lb.show();
+                        $(data).each(function (i, elem) {
+                            lb.append("<option value='" + elem.Item2 + "'>" + elem.Item1 + "</option>");
+                        });
                     }
                 }
             );
         });
 
-        $("#searchTerm").on("keypress", function(e) {
-            if (e.keyCode === 13) {
-                $("#SearchShows").click();
-            }
-        });
 
-        $("#EpisodeResults").on("click", ".addEpisode", function() {
+
+        $("#EpisodeResults").on("click", ".addEpisode", function () {
             spinner.spin(document.getElementById('EpisodeResults'));
             ClearModal();
             var magnet = $(this).data("magnet");
@@ -194,14 +243,18 @@
                     Season: season,
                     EpisodeNumber: episodeNum
                 },
-                function(data) {
+                function (data) {
                     spinner.stop();
                     if (data.indexOf("Success") >= 0) {
                         //alert(data);
                         $("#modalShowName").val(showName);
                         $("#modalEpisodeSeason").val(season);
                         $("#modalEpisodeNum").val(episodeNum);
+                        $("#originalShowName").val(showName);
                         $("#showModal").modal();
+                        GetShowInformation();
+
+
                     } else {
                         alert(data);
                     }
@@ -210,70 +263,29 @@
 
         });
 
-        $("#ShowResults").on("click", ".getShowBtn", function() {
+        $("#ShowResults").on("click", ".getShowBtn", function () {
             console.log(this);
             var id = $(this).parents("tr").find("td.showId").text();
+            var title = $(this).parents("tr").find("td.showTitle").text();
             console.log(id);
             spinner.spin(document.getElementById('ShowResults'));
             $("#EpisodeResults tbody").html("");
-            $.get(
-                getBaseURL() + "EZTV/GetEpisodes",
-                {
-                    showId: id
-                },
-                function(data) {
-                    $("#EpisodeResults #episodeShowTitle").text(data.ShowTitle);
-                    var length = data.Episodes.length;
-                    $("#EpisodeResults #episodeCount").text(length + " episodes");
-
-                    for (var i = 0; i < length; i++) {
-                        $("#EpisodeResults tbody").append(
-                            "<tr>" +
-                            "<td class='episodeId hidden'>" + data.Episodes[i].ID + "</td>" +
-                            "<td class='episodeSeason'>" + data.Episodes[i].Season + "</td>" +
-                            "<td class='episodeNumber'>" + data.Episodes[i].EpisodeNum + "</td>" +
-                            "<td class='episodeTitle'>" + data.Episodes[i].Title + "</td>" +
-                            "<td><button type='button' class='btn btn-default addEpisode' data-magnet='" + data.Episodes[i].Magnet + "'>Add Episode</button></td>" +
-                            "</tr>"
-                        );
-                    }
-                    spinner.stop();
-                    $("#ShowResults").fadeOut(function() {
-                        $("#EpisodeResults").fadeIn();
-                    });
-                }
-            );
-
-
+            document.location.search = "?q=" + title + "&episodes=true";
         });
 
-        $("#SearchShows").on("click", function() {
-            $("#EpisodeResults").fadeOut(function() {
+        $("#SearchShows").on("click", function () {
+            $("#EpisodeResults").fadeOut(function () {
                 $("#ShowResults").fadeIn();
             });
             $("#ShowResults tbody").html("");
             var fragment = $("#searchTerm").val();
             spinner.spin(document.getElementById('ShowResults'));
-            $.get(
-                getBaseURL() + "EZTV/SearchShows",
-                {
-                    searchTerm: fragment
-                },
-                function(data) {
-                    spinner.stop();
-                    var tbody = $("#ShowResults tbody");
-
-                    var len = data.length;
-                    for (var i = 0; i < len; i++) {
-                        tbody.append("<tr>" +
-                            "<td class='showId hidden'>" + data[i].Id + "</td>" +
-                            "<td class='showTitle'>" + data[i].Title + "</td>" +
-                            "<td class='showStatus'>" + data[i].Status + "</td>" +
-                            "<td><button type='button' class='btn btn-default getShowBtn'>Get Episodes</button></td></tr>"
-                        );
-                    }
-                }
-            );
+            window.location.search = "?q=" + fragment;
+        });
+        $("#searchTerm").on("keypress", function (e) {
+            if (e.keyCode === 13) {
+                $("#SearchShows").click();
+            }
         });
     });
     function ClearModal() {
@@ -283,6 +295,27 @@
         $("#btnSaveShow").hide();
         $("#modalEpisodeSeason").val('');
         $("#modalEpisodeNum").val('');
+        $("#modalPickShow").html('').hide();
+    }
+    function GetShowInformation() {
+        var search = $("#modalShowName").val();
+        spinner.spin(document.getElementById('showModal'));
+        $.get(getBaseURL() + "tvdb/lookupshow/",
+            {
+                search: search
+            }, function (data) {
+                if (data.length == 1) {
+                    $.get(getBaseURL() + "tvdb/ShowInformation/" + data[0].Item2,
+                        function (data2) {
+                            spinner.stop();
+                            $("#modalShowName").val(data2.Name);
+                            $("#modalShowSummary").text(data2.Summary);
+                            $("#modalShowBanner").attr("src", getBaseURL() + data2.BannerPath);
+                        }
+                    );
+                }
+            }
+        );
     }
 
 </script>

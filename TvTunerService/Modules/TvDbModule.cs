@@ -72,8 +72,9 @@ namespace TvTunerService.Modules {
                     }
                     var bannerElem = series.Descendants("banner").FirstOrDefault();
 
-                    if (bannerElem != null) {
+                    if (bannerElem != null && !string.IsNullOrWhiteSpace(bannerElem.Value)) {
                         bannerPath = Path.Combine("http://thetvdb.com/banners", bannerElem.Value);
+                        
                     }
                     var summaryElem = series.Descendants("Overview").FirstOrDefault();
                     if (summaryElem != null) {
@@ -82,7 +83,8 @@ namespace TvTunerService.Modules {
 
 
                     var imgDlPath = Path.Combine(ShowBannerDir, name + Path.GetExtension(bannerPath));
-                    if (!File.Exists(imgDlPath)) {
+                    imgDlPath = imgDlPath.Replace(':', '-');
+                    if (!File.Exists(imgDlPath) && bannerPath != null) {
                         wc.DownloadFile(bannerPath, imgDlPath);
                     }
                     var s = new { Name = name, Summary = summary, BannerPath=imgDlPath };

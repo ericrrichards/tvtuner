@@ -8,6 +8,8 @@
 
 
 @foreach (var show in Model.Shows) {
-    <a href="~/Shows/Show/@show.ID"><img src="@Url.Content(show.BannerImg)" /></a>
+    <div class="row">
+        <a href="~/Shows/Show/@show.ID"><img src="@Url.Content(show.BannerImg)" /></a>
+    </div>
 }
 

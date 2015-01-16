@@ -51,7 +51,7 @@ namespace TvTunerService.Infrastructure {
     }
 
     public class Show {
-        private static int _nextID = 0;
+        private static int _nextID;
 
         public int ID { get; set; }
         public string Name { get; set; }
@@ -86,7 +86,7 @@ namespace TvTunerService.Infrastructure {
                 episode.Show = ret;
             }
 
-            if (ret.ID > _nextID) {
+            if (ret.ID >= _nextID) {
                 _nextID = ret.ID + 1;
             }
             return ret;

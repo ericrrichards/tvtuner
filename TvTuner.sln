@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TvTuner", "TvTuner\TvTuner.csproj", "{006C7F06-5598-4A38-A5AE-070EF03ACE9B}"
 EndProject
@@ -24,6 +24,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EZTV", "..\EZTVLib.NET\EZTV\EZTV.csproj", "{A0847B2B-3804-4CCB-9FE5-8AEB5D724CA5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoTorrent", "..\monotorrent\src\MonoTorrent\MonoTorrent.csproj", "{411A9E0E-FDC6-4E25-828A-0C2CD1CD96F8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "transcode", "transcode\transcode.csproj", "{23495E0B-80DA-4382-9240-9000648C763F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -84,6 +86,12 @@ Global
 		{411A9E0E-FDC6-4E25-828A-0C2CD1CD96F8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{411A9E0E-FDC6-4E25-828A-0C2CD1CD96F8}.Stats|Any CPU.ActiveCfg = Stats|Any CPU
 		{411A9E0E-FDC6-4E25-828A-0C2CD1CD96F8}.Stats|Any CPU.Build.0 = Stats|Any CPU
+		{23495E0B-80DA-4382-9240-9000648C763F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23495E0B-80DA-4382-9240-9000648C763F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23495E0B-80DA-4382-9240-9000648C763F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23495E0B-80DA-4382-9240-9000648C763F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{23495E0B-80DA-4382-9240-9000648C763F}.Stats|Any CPU.ActiveCfg = Release|Any CPU
+		{23495E0B-80DA-4382-9240-9000648C763F}.Stats|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

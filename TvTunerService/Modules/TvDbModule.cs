@@ -80,7 +80,7 @@ namespace TvTunerService.Modules {
                     if (summaryElem != null) {
                         summary = summaryElem.Value;
                     }
-
+                    
 
                     var imgDlPath = Path.Combine(ShowBannerDir, name + Path.GetExtension(bannerPath));
                     imgDlPath = imgDlPath.Replace(':', '-');

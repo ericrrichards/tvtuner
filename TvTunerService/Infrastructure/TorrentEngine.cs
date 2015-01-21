@@ -1,10 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using log4net;
+using MediaToolkit;
+using MediaToolkit.Model;
 using MonoTorrent;
 
 namespace TvTunerService.Infrastructure {
@@ -44,7 +46,20 @@ namespace TvTunerService.Infrastructure {
             };
 
             var proc = new Process { StartInfo = args };
-            proc.Exited += (sender, e) => Log.Info("Finished downloading " + magnetLink.Name);
+            proc.Exited += (sender, e) => {
+                Log.Info("Finished downloading " + magnetLink.Name);
+                var file = Directory.GetFiles(downloadPath).FirstOrDefault(f => f.Contains(magnetLink.Name));
+                var newfileName = Path.Combine(Path.GetDirectoryName(file), magnetLink.Name + Path.GetExtension(file));
+                if (newfileName != file) {
+                    File.Move(file, newfileName);
+                }
+                if (!string.IsNullOrEmpty(file) && Path.GetExtension(file) != ".mp4") {
+                    Log.Debug("Needs conversion");
+                    Transcoder.ConvertToMp4(newfileName);
+                } else {
+                    Log.Debug("Format ok");
+                }
+            };
             proc.OutputDataReceived += (sender, e) => {
                 if (!string.IsNullOrWhiteSpace(e.Data)) Log.Debug(e.Data);
             };
@@ -58,5 +73,38 @@ namespace TvTunerService.Infrastructure {
             return Path.Combine(downloadPath, magnetLink.Name);
         }
 
+    }
+
+    public static class Transcoder {
+        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+
+        public static void ConvertToMp4(string original) {
+            var converted = Path.GetDirectoryName(original) + "/" + Path.GetFileNameWithoutExtension(original) + ".mp4";
+
+            ConvertToMp4(original, converted);
+        }
+
+        public static void ConvertToMp4(string original, string converted) {
+            var proc = new ProcessStartInfo("HandBrakeCLI.exe") {
+                Arguments = string.Format("-i \"{0}\" -o \"{1}\" --preset=\"Normal\"", original, converted),
+                CreateNoWindow = true,
+                WorkingDirectory = Directory.GetCurrentDirectory(),
+                UseShellExecute = false,
+                RedirectStandardOutput = true
+            };
+
+            var p = new Process {StartInfo = proc, EnableRaisingEvents = true};
+            p.OutputDataReceived += (sender, e) => {
+                if (!string.IsNullOrWhiteSpace(e.Data)) Log.Debug(e.Data);
+            };
+            p.Exited += (sender, e) => {
+                Log.InfoFormat("Finished transcoding {0} to {1}", original, converted);
+                File.Delete(original);
+            };
+            
+            p.Start();
+
+            p.BeginOutputReadLine();
+        }
     }
 }

@@ -14,6 +14,7 @@ using TvTunerService.Models;
 namespace TvTunerService.Modules {
     public class HomeModule : NancyModule {
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private const string ShowBannerDir = "Content/images/showBanners";
 
         public HomeModule() {
             Get["/"] = Index;
@@ -26,8 +27,9 @@ namespace TvTunerService.Modules {
             Get["/EZTV/GetEpisodes"] = GetEpisodes;
             Post["/EZTV/AddToLibrary"] = AddToLibrary;
 
-            Post["shows/show/update/{ShowName}"] = UpdateShow;
-            Get["Video/{episodeID}"] = Video;
+            Post["/shows/show/update/{ShowName}"] = UpdateShow;
+            Get["/Video/{episodeID}"] = Video;
+            Get["/ShowInformation/{name}"] = ShowInformation;
 
         }
 
@@ -142,10 +144,24 @@ namespace TvTunerService.Modules {
         private dynamic Video(dynamic parameters) {
             int id = parameters.episodeID;
             var path = ShowRepository.Instance.Episodes.First(e => e.ID == id).Filename;
-            
+
             return Response.FromPartialFile(Request, path, "video/mp4");
         }
+        private dynamic ShowInformation(dynamic parameters) {
+            string showName = parameters.name;
+            var series = ShowRepository.Instance[showName];
+            if (series != null) {
+                var name = series.Name;
+                var summary = series.Summary;
+                var imgDlPath = series.BannerImg.Substring(2);
+                var s = new { Name = name, Summary = summary, BannerPath = imgDlPath };
+
+                return NancyUtils.JsonResponse(s);
+            }
+            return NancyUtils.JsonResponse("No result found");
+        }
     }
-
-
 }
+
+
+

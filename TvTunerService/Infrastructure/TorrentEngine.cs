@@ -48,7 +48,8 @@ namespace TvTunerService.Infrastructure {
             var proc = new Process { StartInfo = args };
             proc.Exited += (sender, e) => {
                 Log.Info("Finished downloading " + magnetLink.Name);
-                var file = Directory.GetFiles(downloadPath).FirstOrDefault(f => f.Contains(magnetLink.Name));
+                var file = GetBestMatch(Directory.GetFiles(downloadPath), magnetLink.Name);
+
                 var newfileName = Path.Combine(Path.GetDirectoryName(file), magnetLink.Name + Path.GetExtension(file));
                 if (newfileName != file) {
                     File.Move(file, newfileName);
@@ -73,6 +74,24 @@ namespace TvTunerService.Infrastructure {
             return Path.Combine(downloadPath, magnetLink.Name);
         }
 
+        private string GetBestMatch(string[] files, string name) {
+            var firstTry = files.FirstOrDefault(f => f.Contains(name));
+            if (firstTry != null) {
+                return firstTry;
+            }
+            string bestmatch = null;
+            int bestCount = 0;
+            var nameParts = name.Split(new[] {'.'}, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var file in files) {
+                var fileParts = file.Split(new[] {'.'}, StringSplitOptions.RemoveEmptyEntries);
+                var count = nameParts.Intersect(fileParts).Count();
+                if (count > bestCount) {
+                    bestCount = count;
+                    bestmatch = file;
+                }
+            }
+            return bestmatch;
+        }
     }
 
     public static class Transcoder {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -72,6 +73,7 @@ namespace TvTunerService.Modules {
                 var series = xml.Descendants("Series").FirstOrDefault();
                 if (series != null) {
                     string bannerPath = null;
+                    string bannerFile = null;
                     string name = null;
                     string summary = null;
                     var nameElem = series.Descendants("SeriesName").FirstOrDefault();
@@ -82,20 +84,35 @@ namespace TvTunerService.Modules {
                     var bannerElem = series.Descendants("banner").FirstOrDefault();
 
                     if (bannerElem != null && !string.IsNullOrWhiteSpace(bannerElem.Value)) {
-                        bannerPath = Path.Combine("http://thetvdb.com/banners", bannerElem.Value);
-                        
+                        bannerFile = bannerElem.Value;
+
                     }
                     var summaryElem = series.Descendants("Overview").FirstOrDefault();
                     if (summaryElem != null) {
                         summary = summaryElem.Value;
                     }
-                    
 
-                    var imgDlPath = Path.Combine(ShowBannerDir, name + Path.GetExtension(bannerPath));
-                    imgDlPath = imgDlPath.Replace(':', '-');
-                    if (!File.Exists(imgDlPath) && bannerPath != null) {
-                        wc.DownloadFile(bannerPath, imgDlPath);
+                    bannerPath = Path.Combine("http://thetvdb.com/banners", bannerFile);
+                    var extension = Path.GetExtension(bannerPath);
+                    if (string.IsNullOrWhiteSpace(extension)) {
+                        extension = ".jpg";
                     }
+                    var imgDlPath = Path.Combine(ShowBannerDir, name + extension);
+                    imgDlPath = imgDlPath.Replace(':', '-');
+                    if (!File.Exists(imgDlPath) && !string.IsNullOrWhiteSpace(bannerPath)) {
+                        wc.DownloadFile(bannerPath, imgDlPath);
+                    } else if (string.IsNullOrWhiteSpace(bannerPath)) {
+                        var bmp = new Bitmap(758, 140);
+                        var g = Graphics.FromImage(bmp);
+                        var font = new Font("Impact", 24);
+                        var rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
+                        g.FillRectangle(Brushes.Black, rect);
+                        var sf = new StringFormat() {Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center};
+                        g.DrawString(name, font, Brushes.White, rect, sf);
+
+                        bmp.Save(imgDlPath);
+                    }
+
                     var s = new { Name = name, Summary = summary, BannerPath=imgDlPath };
 
                     
@@ -106,10 +123,17 @@ namespace TvTunerService.Modules {
         }
 
         private dynamic LookupEpisode(dynamic parameters) {
-            string showName = Request.Query["showname"];
-            int seasonNum = Request.Query["seasonNum"];
-            int episodeNum = Request.Query["episodeNum"];
+            string showName = null;
+            int seasonNum = 0; int episodeNum = 0;
+            try {
+                showName = Request.Query["showname"];
 
+                seasonNum = Request.Query["seasonNum"];
+
+                episodeNum = Request.Query["episodeNum"];
+            } catch (Exception ex) {
+                Log.Error("Exception in " + ex.TargetSite.Name, ex);
+            }
             var results = DoShowLookup(showName);
             var id = results.First().Item2;
             var xml = GetShowXml(id);
@@ -141,12 +165,27 @@ namespace TvTunerService.Modules {
             if (string.IsNullOrWhiteSpace(summary)) {
                 summary = "No summary";
             }
-            var thumbpath = Path.Combine("http://thetvdb.com/banners", foundEpisode.Descendants("filename").First().Value);
-            var imgDlPath = Path.Combine(EpisodeThumbDir, title.Replace("/", "-").Replace("\\", "-") + Path.GetExtension(thumbpath));
+            var thumbFile = foundEpisode.Descendants("filename").First().Value;
+            var thumbpath = Path.Combine("http://thetvdb.com/banners", thumbFile);
+            var extension = Path.GetExtension(thumbpath);
+            if (string.IsNullOrWhiteSpace(extension)) {
+                extension = ".jpg";
+            }
+            var imgDlPath = Path.Combine(EpisodeThumbDir, title.Replace("/", "-").Replace("\\", "-") + extension);
             imgDlPath = imgDlPath.Replace(':', '-').Replace(" ", "_");
             using (var wc = new WebClient()) {
-                if (!File.Exists(imgDlPath) && thumbpath != null) {
+                if (!File.Exists(imgDlPath) && !string.IsNullOrWhiteSpace(thumbFile)) {
                     wc.DownloadFile(thumbpath, imgDlPath);
+                } else if (string.IsNullOrWhiteSpace(thumbFile)) {
+                    var bmp = new Bitmap(400, 225);
+                    var g = Graphics.FromImage(bmp);
+                    var font = new Font("Impact", 24);
+                    var rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
+                    g.FillRectangle(Brushes.Black, rect);
+                    var sf = new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+                    g.DrawString(title, font, Brushes.White, rect, sf);
+
+                    bmp.Save(imgDlPath);
                 }
             }
             return NancyUtils.JsonResponse(new {

@@ -30,6 +30,7 @@ namespace TvTunerService.Modules {
             Post["/shows/show/update/{ShowName}"] = UpdateShow;
             Get["/Video/{episodeID}"] = Video;
             Get["/ShowInformation/{name}"] = ShowInformation;
+            Get["/EpisodeInformation/{id}"] = EpisodeInformation;
 
         }
 
@@ -50,6 +51,13 @@ namespace TvTunerService.Modules {
             EZTVEpisodeList episodes = null;
             if (results.Count == 1 && showEpisodes) {
                 episodes = EZTV.EZTV.GetEpisodes(results.First().Id);
+                var myShowEpisodes = ShowRepository.Instance[episodes.ShowTitle].Episodes;
+                foreach (var episode in episodes.Episodes) {
+                    EZTVEpisode episode1 = episode;
+                    if ( myShowEpisodes.Any(e=>e.SeasonNumber == episode1.Season && e.EpisodeNumber == episode1.EpisodeNum && e.Filename.Contains(episode1.Title.Replace(' ', '.')))) {
+                        episode.InLibrary = true;
+                    }
+                }
             }
 
             var model = new BrowseEztvModel(Context) {
@@ -96,20 +104,23 @@ namespace TvTunerService.Modules {
                     ShowRepository.Instance.AddShow(new Show(model.ShowName));
                     show = ShowRepository.Instance[model.ShowName];
                 }
+                int id = -1;
                 if (!show.HasEpisode(filename)) {
+                    var episode = new Episode(show) {
+                        Title = Path.GetFileNameWithoutExtension(filename),
+                        SeasonNumber = model.Season,
+                        EpisodeNumber = model.EpisodeNumber,
+                        Filename = filename
+                    };
+                    id = episode.ID;
                     show.Episodes.Add(
-                        new Episode(show) {
-                            Title = Path.GetFileNameWithoutExtension(filename),
-                            SeasonNumber = model.Season,
-                            EpisodeNumber = model.EpisodeNumber,
-                            Filename = filename
-                        }
+                        episode
                     );
                 }
                 ShowRepository.Instance.SaveData();
 
 
-                return NancyUtils.JsonResponse("Success " + filename);
+                return NancyUtils.JsonResponse("Success " + filename + " " + id);
             } catch (Exception ex) {
                 Log.Error("Exception in " + ex.TargetSite.Name, ex);
                 return NancyUtils.JsonResponse(ex.Message);
@@ -132,6 +143,25 @@ namespace TvTunerService.Modules {
 
                 show.BannerImg = "~" + bannerUrl.Substring(index);
 
+                var episode = show.Episodes.FirstOrDefault(e => e.ID == model.OriginalEpisodeId);
+                if (episode != null) {
+                    episode.Title = model.EpisodeTitle;
+                    episode.Summary = model.EpisodeSummary;
+                    episode.ThumbFilePath = model.EpisodeThumb;
+                    episode.EpisodeNumber = model.EpisodeNumber;
+                    episode.SeasonNumber = model.EpisodeSeason;
+                } else if (ShowRepository.Instance.Episodes.Any(e => e.ID == model.OriginalEpisodeId)) {
+                    episode = ShowRepository.Instance.Episodes.First(e => e.ID == model.OriginalEpisodeId);
+                    episode.Show.Episodes.Remove(episode);
+                    episode.Show = show;
+                    episode.Title = model.EpisodeTitle;
+                    episode.Summary = model.EpisodeSummary;
+                    episode.ThumbFilePath = model.EpisodeThumb;
+                    episode.EpisodeNumber = model.EpisodeNumber;
+                    episode.SeasonNumber = model.EpisodeSeason;
+                    show.Episodes.Add(episode);
+                }
+
                 ShowRepository.Instance.SaveData();
 
                 return NancyUtils.JsonResponse("Success");
@@ -153,10 +183,28 @@ namespace TvTunerService.Modules {
             if (series != null) {
                 var name = series.Name;
                 var summary = series.Summary;
-                var imgDlPath = series.BannerImg.Substring(2);
+                string imgDlPath = null;
+                if (!string.IsNullOrWhiteSpace(series.BannerImg)) {
+                    imgDlPath = series.BannerImg.Substring(2);
+                }
                 var s = new { Name = name, Summary = summary, BannerPath = imgDlPath };
 
                 return NancyUtils.JsonResponse(s);
+            }
+            return NancyUtils.JsonResponse("No result found");
+        }
+
+        private dynamic EpisodeInformation(dynamic parameters) {
+            int id = parameters.id;
+            var episode = ShowRepository.Instance.Episodes.FirstOrDefault(e => e.ID == id);
+            if (episode != null) {
+                return NancyUtils.JsonResponse(new {
+                    episode.SeasonNumber, 
+                    episode.EpisodeNumber,
+                    episode.Title,
+                    episode.Summary,
+                    episode.ThumbFilePath
+                });
             }
             return NancyUtils.JsonResponse("No result found");
         }

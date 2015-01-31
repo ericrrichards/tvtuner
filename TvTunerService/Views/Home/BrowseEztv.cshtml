@@ -72,7 +72,13 @@
                                 <td class='episodeSeason'>@episode.Season</td>
                                 <td class='episodeNumber'>@episode.EpisodeNum</td>
                                 <td class='episodeTitle'>@episode.Title </td>
-                                <td><button type='button' class='btn btn-default addEpisode' data-magnet='@episode.Magnet'>Add Episode</button></td>
+                                <td class="addToLibrary">
+                                    @if (!episode.InLibrary) {
+                                        <button type='button' class='btn btn-default addEpisode' data-magnet='@episode.Magnet'>Add Episode</button>
+                                    } else {
+                                        <span class='label label-success'>In Library</span>
+                                    }
+                                </td>
                             </tr>
                         }
                     }
@@ -88,8 +94,8 @@
     <script>
         $(function () {
             $("#EpisodeResults").on("click", ".addEpisode", function () {
-                spinner.spin(document.getElementById('EpisodeResults'));
-                ClearModal();
+                tvtuner.spinner.spin(document.getElementById('EpisodeResults'));
+                tvtuner.ClearModal();
                 var magnet = $(this).data("magnet");
                 var showName = $("#episodeShowTitle").text();
                 var season = $(this).parents("tr").find(".episodeSeason").text();
@@ -97,7 +103,7 @@
 
 
                 $.post(
-                    getBaseURL() + "EZTV/AddToLibrary",
+                    tvtuner.getBaseURL() + "EZTV/AddToLibrary",
                     {
                         ShowName: showName,
                         MagnetLink: magnet,
@@ -105,7 +111,7 @@
                         EpisodeNumber: episodeNum
                     },
                     function (data) {
-                        spinner.stop();
+                        tvtuner.spinner.stop();
                         if (data.indexOf("Success") >= 0) {
                             //alert(data);
                             $("#modalShowName").val(showName);
@@ -114,9 +120,13 @@
                             $("#originalShowName").val(showName);
                             $("#showModal").modal();
 
+                            console.log(data);
+                            console.log(data.split(" "));
+                            var id = data.split(" ")[2];
+                            $("#originalEpisodeId").val(id);
 
-                            GetShowInformationFromRepository(LookupShow);
-
+                            tvtuner.GetShowInformationFromRepository($("#modalShowName").val(), tvtuner.LookupShow);
+                            tvtuner.GetEpisodeInformationFromRepository(id, tvtuner.LookupEpisode);
 
                         } else {
                             alert(data);
@@ -131,7 +141,7 @@
                 var id = $(this).parents("tr").find("td.showId").text();
                 var title = $(this).parents("tr").find("td.showTitle").text();
                 console.log(id);
-                spinner.spin(document.getElementById('ShowResults'));
+                tvtuner.spinner.spin(document.getElementById('ShowResults'));
                 $("#EpisodeResults tbody").html("");
                 document.location.search = "?q=" + title + "&episodes=true";
             });
@@ -142,7 +152,7 @@
                 });
                 $("#ShowResults tbody").html("");
                 var fragment = $("#searchTerm").val();
-                spinner.spin(document.getElementById('ShowResults'));
+                tvtuner.spinner.spin(document.getElementById('ShowResults'));
                 window.location.search = "?q=" + fragment;
             });
 
@@ -152,20 +162,4 @@
                 }
             });
         });
-        function GetShowInformationFromRepository(failure) {
-            $.get(getBaseURL() + "ShowInformation/" + $("#modalShowName").val(),
-                function (data2) {
-                    if (typeof data2 === "string") {
-                        failure();
-                        return;
-                    } else {
-                        spinner.stop();
-                        $("#modalShowName").val(data2.Name);
-                        $("#modalShowSummary").text(data2.Summary);
-                        $("#modalShowBanner").attr("src", getBaseURL() + data2.BannerPath);
-                        $("#btnSaveShow").show();
-                    }
-                }
-            );
-        }
     </script>

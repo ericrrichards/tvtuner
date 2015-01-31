@@ -1,4 +1,5 @@
-﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<TvTunerService.Models.ShowModel>
+﻿@using System.Linq
+@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<TvTunerService.Models.ShowModel>
 
 @{
     Layout = "Views/Shared/_Layout.cshtml";
@@ -7,17 +8,50 @@
 
 <div class="row">
     <div class="col-sm-12">
-        <h2>@Model.Show.Name</h2>
+        <h2 id="showName">@Model.Show.Name</h2>
         <img src="@Url.Content(Model.Show.BannerImg)" />
         <div style="max-width: 758px">
             <div class="well">@Model.Show.Summary</div>
 
-            <ul>
-                @foreach (var episode in Model.Show.Episodes) {
-                    <li><a href="~/Show/Watch/@episode.ID">@episode.Title</a></li>
-                }
-            </ul>
+
         </div>
+        <table class="table">
+            <tbody>
+                @foreach (var episode in Model.Show.Episodes.OrderByDescending(e=>e.SeasonNumber).ThenByDescending(e=>e.EpisodeNumber)) {
+                    <tr>
+                        <td style="width: 416px;">
+                            <a href="~/Show/Watch/@episode.ID"><img src="@Url.Content("~/"+episode.ThumbFilePath)" /></a>
+                        </td>
+                        <td >
+                            
+                            <div><h2>@episode.Title</h2><a href="#"><span class="glyphicon glyphicon-list-alt getEpisodeInfo" data-id="@episode.ID"></span></a></div>
+                            <div><label>Season:</label>@episode.SeasonNumber</div>
+                            <div><label>Episode:</label> @episode.EpisodeNumber</div>
+                            <div>@episode.Summary</div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
 </div>
 
+@Html.Partial("Views/Home/ShowInfo")
+
+<script>
+    $(function () {
+        $(".getEpisodeInfo").on("click", function () {
+            var id = $(this).data("id");
+            tvtuner.ClearModal();
+            $("#originalEpisodeId").val(id);
+
+            tvtuner.GetShowInformationFromRepository($("#showName").text(), tvtuner.LookupShow);
+            tvtuner.GetEpisodeInformationFromRepository(id, tvtuner.LookupEpisode);
+
+            $("#showModal").modal();
+
+
+
+        });
+    });
+</script>

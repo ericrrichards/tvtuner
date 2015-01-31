@@ -1,5 +1,6 @@
 ﻿<div class="modal fade" id="showModal">
     <input type="hidden" id="originalShowName" />
+    <input type="hidden" id="originalEpisodeId" />
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -44,7 +45,28 @@
                         </div>
                         <div id="episodeInformation" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
                             <div class="panel-body">
+                                <table id="episodeList" class="table" style="display:none">
+                                    <thead>
+                                        <tr>
+                                            <th>Title</th>
+                                            <th>Season</th>
+                                            <th>Episode</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        
+                                    </tbody>
+                                </table>
+
                                 <div class="form-horizontal">
+                                    <div class="form-group">
+                                        <label for="modalEpisodeTitle" class="col-sm-2 control-label">Title</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" id="modalEpisodeTitle" class="form-control" />
+                                        </div>
+                                    </div>
+
                                     <div class="form-group">
                                         <label for="modalEpisodeSeason" class="col-sm-2 control-label">Season</label>
                                         <div class="col-sm-10">
@@ -57,6 +79,20 @@
                                             <input type="text" id="modalEpisodeNum" class="form-control" />
                                         </div>
                                     </div>
+                                    <div class="form-group">
+                                        <label for="modalEpisodeSummary" class="col-sm-2 control-label">Summary</label>
+                                        <div class="col-sm-10">
+                                            <textarea id="modalEpisodeSummary" class="form-control"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class ="form-group">
+                                        <div class="col-sm-2"></div>
+                                        <div class="col-sm10">
+                                            <img id="modalEpisodeThumb" src="" />
+                                        </div>
+                                    </div>
+                                    
+                                    <button class="btn btn-default" type="button" id="btnTVDBLookupEpisode">Lookup</button>
                                 </div>
                             </div>
                         </div>
@@ -78,17 +114,30 @@
             var summary = $("#modalShowSummary").text();
             var bannerUrl = $("#modalShowBanner").attr("src");
 
+            var epSeason = $("#modalEpisodeSeason").val();
+            var epEpNum = $('#modalEpisodeNum').val();
+            var epTitle = $("#modalEpisodeTitle").val();
+            var epSummary = $("#modalEpisodeSummary").val();
+            var thumbPath = $("#modalEpisodeThumb").attr("src").replace(tvtuner.getBaseURL(),'');
+            console.log(thumbPath);
 
             $.post(
-                getBaseURL() + "shows/show/update/" + showName,
+                tvtuner.getBaseURL() + "shows/show/update/" + showName,
                 {
                     ShowName: showName,
                     Summary: summary,
-                    BannerUrl: bannerUrl
+                    BannerUrl: bannerUrl,
+                    EpisodeSeason: epSeason,
+                    EpisodeNumber : epEpNum,
+                    EpisodeTitle: epTitle,
+                    EpisodeSummary: epSummary,
+                    EpisodeThumb: thumbPath,
+                    OriginalEpisodeId : $("#originalEpisodeId").val()
                 },
                 function (data) {
                     if (data === "Success") {
                         $("#showModal").modal('hide');
+                        window.location.reload();
                     } else {
                         $("#btnSaveShow").parent().append(
                             '<div class="alert alert-success alert-dismissible fade in" role="alert">' +
@@ -100,59 +149,17 @@
         });
 
         $("#modalPickShow").on("click", "option", function () {
-            GetShowInformation($(this).val());
+            tvtuner.GetShowInformation($(this).val());
         });
 
         $("#btnTVDBLookupShow").on("click", function () {
-            LookupShow();
+            tvtuner.LookupShow();
+        });
+        $("#btnTVDBLookupEpisode").on("click", function() {
+            tvtuner.LookupEpisode($("#modalShowName").val(), $("#modalEpisodeSeason").val(), $("#modalEpisodeNum").val());
         });
 
     });
-    function ClearModal() {
-        $("#modalShowName").val('');
-        $("#modalShowBanner").attr('src', '');
-        $("#modalShowSummary").text('');
-        $("#btnSaveShow").hide();
-        $("#modalEpisodeSeason").val('');
-        $("#modalEpisodeNum").val('');
-        $("#modalPickShow").html('').hide();
-    }
-    function LookupShow() {
-        var search = $("#modalShowName").val();
-        spinner.spin(document.getElementsByClassName('modal-body')[0]);
-        var lb = $("#modalPickShow");
-        lb.html('');
-        $.get(getBaseURL() + "tvdb/lookupshow/",
-            {
-                search: search
-            }, function (data) {
-                if (typeof data === "string") {
-                    spinner.stop();
-                    alert(data);
-                    return;
-                }
-
-                if (data.length == 1) {
-                    GetShowInformation(data[0].Item2);
-                } else if (data.length > 1) {
-                    lb.show();
-                    $(data).each(function (i, elem) {
-                        lb.append("<option value='" + elem.Item2 + "'>" + elem.Item1 + "</option>");
-                    });
-                    spinner.stop();
-                }
-            }
-        );
-    }
-    function GetShowInformation(id) {
-        $.get(getBaseURL() + "tvdb/ShowInformation/" + id,
-                function (data2) {
-                    spinner.stop();
-                    $("#modalShowName").val(data2.Name);
-                    $("#modalShowSummary").text(data2.Summary);
-                    $("#modalShowBanner").attr("src", getBaseURL() + data2.BannerPath);
-                    $("#btnSaveShow").show();
-                }
-            );
-    }
+    
+    
 </script>

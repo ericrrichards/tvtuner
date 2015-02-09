@@ -22,6 +22,7 @@ namespace TvTunerService.Modules {
             Get["/Shows/"] = Shows;
             Get["/Shows/Show/{id}"] = Show;
             Get["/Show/Watch/{id}"] = WatchEpisode;
+            Get["/Show/Next/{id}"] = NextEpisode;
 
             Get["/EZTV/SearchShows"] = SearchEZTVShows;
             Get["/EZTV/GetEpisodes"] = GetEpisodes;
@@ -54,8 +55,10 @@ namespace TvTunerService.Modules {
                 var myShowEpisodes = ShowRepository.Instance[episodes.ShowTitle].Episodes;
                 foreach (var episode in episodes.Episodes) {
                     EZTVEpisode episode1 = episode;
-                    if ( myShowEpisodes.Any(e=>e.SeasonNumber == episode1.Season && e.EpisodeNumber == episode1.EpisodeNum && e.Filename.Contains(episode1.Title.Replace(' ', '.')))) {
+                    var libEpisode = myShowEpisodes.FirstOrDefault(e=>e.SeasonNumber == episode1.Season && e.EpisodeNumber == episode1.EpisodeNum && e.Filename.Contains(episode1.Title.Replace(' ', '.')));
+                    if ( libEpisode != null) {
                         episode.InLibrary = true;
+                        episode.LibId = libEpisode.ID;
                     }
                 }
             }
@@ -79,6 +82,33 @@ namespace TvTunerService.Modules {
             //episodeModel.Episode.Filename = "/" + TvTunerSvc.siteRoot + "/" + episodeModel.Episode.Filename;
             return View["Views/Shows/Watch", episodeModel];
         }
+
+        private dynamic NextEpisode(dynamic parameters) {
+            int id = parameters.id;
+            var episode = ShowRepository.Instance.Episodes.First(e => e.ID == id);
+
+            var show = episode.Show;
+            var nextInSeason = show.Season(episode.SeasonNumber).FirstOrDefault(e => e.EpisodeNumber > episode.EpisodeNumber);
+            if (nextInSeason != null) {
+                return NancyUtils.JsonResponse(nextInSeason.ID);
+            }
+
+            foreach (var season in show.Seasons.Where(s=> s > episode.SeasonNumber)) {
+                var firstInNextSeason = show.Season(season).FirstOrDefault();
+                if (firstInNextSeason != null) {
+                    return NancyUtils.JsonResponse(firstInNextSeason.ID);
+                }
+            }
+
+            var firstEpisode = show.FirstEpisode;
+            if (firstEpisode != null) {
+                return NancyUtils.JsonResponse(firstEpisode.ID);
+            }
+            var ret = NancyUtils.JsonResponse("No next episode found!");
+            ret.StatusCode = HttpStatusCode.NotFound;
+            return ret;
+        }
+
         private dynamic SearchEZTVShows(dynamic parameters) {
             string searchFragment = Request.Query["searchTerm"];
 

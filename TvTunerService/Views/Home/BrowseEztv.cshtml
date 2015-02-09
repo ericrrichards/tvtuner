@@ -76,7 +76,7 @@
                                     @if (!episode.InLibrary) {
                                         <button type='button' class='btn btn-default addEpisode' data-magnet='@episode.Magnet'>Add Episode</button>
                                     } else {
-                                        <span class='label label-success'>In Library</span>
+                                        <a href="~/Show/Watch/@episode.LibId"><span class='label label-success'>In Library</span></a>
                                     }
                                 </td>
                             </tr>

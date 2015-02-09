@@ -4,8 +4,22 @@
     Layout = "Views/Shared/_Layout.cshtml";
 }
 
-<h3>Season @Model.Episode.SeasonNumber Episode @Model.Episode.EpisodeNumber - @Model.Episode.Title</h3>
+<h3><a href="~/Shows/Show/@Model.Episode.Show.ID" >@Model.Episode.Show.Name</a> Season @Model.Episode.SeasonNumber Episode @Model.Episode.EpisodeNumber - @Model.Episode.Title</h3>
 
-<video width="932" height="700" controls="controls" autoplay="autoplay">
+<video width="932"  controls="controls" autoplay="autoplay">
     <source src="@Url.Content("~/Video/"+Model.Episode.ID)" type="video/mp4" />
 </video>
+
+<script>
+    $(function() {
+        $("video").on("ended", function() {
+            $.get(tvtuner.getBaseURL() + "Show/Next/@Model.Episode.ID")
+                .success(function(data) {
+                    window.location = tvtuner.getBaseURL() + "Show/Watch/" + data;
+                })
+                .error(function(data) {
+                    alert(data);
+                });
+        });
+    });
+</script>

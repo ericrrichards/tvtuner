@@ -68,6 +68,16 @@ namespace TvTunerService.Infrastructure {
             ID = _nextID++;
         }
 
+        public IEnumerable<Episode> Season(int seasonNumber) {
+            return Episodes.Where(e => e.SeasonNumber == seasonNumber).OrderBy(e => e.EpisodeNumber);
+        }
+        public IEnumerable<int> Seasons { get { return Episodes.Select(e => e.SeasonNumber).Distinct().OrderBy(a=>a); } }
+
+        public Episode FirstEpisode {
+            get { return Season(Seasons.Min()).FirstOrDefault(); }
+        }
+
+
         public bool HasEpisode(string filename) {
             return Episodes.Any(e => e.Filename == filename);
         }

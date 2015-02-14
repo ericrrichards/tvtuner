@@ -20,17 +20,16 @@ namespace TvTunerService.Infrastructure {
         static TorrentEngine() { }
         #endregion
 
-        private readonly string _downloadBasePath;
-
+        public static string DownloadBasePath;
 
         private TorrentEngine() {
-            _downloadBasePath = ConfigurationManager.AppSettings["VideoDirectory"];
+            DownloadBasePath = ConfigurationManager.AppSettings["VideoDirectory"];
             
         }
 
         public string AddMagnetLink(string magnet, string downloadPath) {
 
-            downloadPath = Path.Combine(_downloadBasePath, downloadPath);
+            downloadPath = Path.Combine(DownloadBasePath, downloadPath);
             if (!Directory.Exists(downloadPath)) {
                 Directory.CreateDirectory(downloadPath);
             }

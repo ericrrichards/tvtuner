@@ -122,6 +122,8 @@ namespace TvTunerService.Modules {
             }
         }
 
+        
+
         private dynamic LookupEpisode(dynamic parameters) {
             string showName = null;
             int seasonNum = 0; int episodeNum = 0;
@@ -148,18 +150,44 @@ namespace TvTunerService.Modules {
                     break;
                 }
             }
-            if (foundEpisode == null) {
-
-                var eps = episodes.Select(e => 
-                    new {
-                        title = e.Descendants("EpisodeName").First().Value,
-                        season = Convert.ToInt32(e.Descendants("SeasonNumber").First().Value),
-                        episodeNumber = Convert.ToInt32(e.Descendants("EpisodeNumber").First().Value)
-                    }
-                );
+            if (foundEpisode != null) {
+                var ret = AquireEpisodeInfo(foundEpisode);
+                return NancyUtils.JsonResponse(ret);
+            }
+            else {
+                var eps = episodes.Select(e => new {
+                    title = e.Descendants("EpisodeName").First().Value,
+                    season = Convert.ToInt32(e.Descendants("SeasonNumber").First().Value),
+                    episodeNumber = Convert.ToInt32(e.Descendants("EpisodeNumber").First().Value)
+                });
 
                 return NancyUtils.JsonResponse(eps.ToArray());
             }
+        }
+
+        public static TvDbShowInfo LookupUploadedEpisode(string showName, int seasonNum, int episodeNum) {
+            var results = DoShowLookup(showName);
+            var id = results.First().Item2;
+            var xml = GetShowXml(id);
+
+            var episodes = xml.Descendants("Episode").ToList();
+            XElement foundEpisode = null;
+            foreach (var ep in episodes) {
+                var epSeason = Convert.ToInt32(ep.Descendants("SeasonNumber").First().Value);
+                var epEpNum = Convert.ToInt32(ep.Descendants("EpisodeNumber").First().Value);
+                if (epSeason == seasonNum && epEpNum == episodeNum) {
+                    foundEpisode = ep;
+                    break;
+                }
+            }
+            if (foundEpisode != null) {
+                var ret = AquireEpisodeInfo(foundEpisode);
+                return ret;
+            }
+            return null;
+        }
+
+        private static TvDbShowInfo AquireEpisodeInfo(XElement foundEpisode) {
             var title = foundEpisode.Descendants("EpisodeName").First().Value;
             var summary = foundEpisode.Descendants("Overview").First().Value;
             if (string.IsNullOrWhiteSpace(summary)) {
@@ -182,18 +210,17 @@ namespace TvTunerService.Modules {
                     var font = new Font("Impact", 24);
                     var rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
                     g.FillRectangle(Brushes.Black, rect);
-                    var sf = new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+                    var sf = new StringFormat() {
+                        Alignment = StringAlignment.Center,
+                        LineAlignment = StringAlignment.Center
+                    };
                     g.DrawString(title, font, Brushes.White, rect, sf);
 
                     bmp.Save(imgDlPath);
                 }
             }
-            return NancyUtils.JsonResponse(new {
-                title,
-                summary,
-                imgDlPath
-            });
-
+            var ret = new TvDbShowInfo(title, summary, imgDlPath);
+            return ret;
         }
 
         private static XDocument GetShowXml(string id) {
@@ -209,6 +236,20 @@ namespace TvTunerService.Modules {
                 XDocument xml = XDocument.Load(seriesXml.Open());
                 return xml;
             }
+        }
+    }
+    public class TvDbShowInfo {
+        private readonly string _title;
+        private readonly string _summary;
+        private readonly string _imgDlPath;
+        public string title { get { return _title; } }
+        public string summary { get { return _summary; } }
+        public string imgDlPath { get { return _imgDlPath; } }
+
+        public TvDbShowInfo(string title, string summary, string imgDlPath) {
+            _title = title;
+            _summary = summary;
+            _imgDlPath = imgDlPath;
         }
     }
 }

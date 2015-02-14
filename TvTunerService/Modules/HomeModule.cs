@@ -12,6 +12,8 @@ using TvTunerService.Infrastructure;
 using TvTunerService.Models;
 
 namespace TvTunerService.Modules {
+    using System.Text.RegularExpressions;
+
     public class HomeModule : NancyModule {
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         private const string ShowBannerDir = "Content/images/showBanners";
@@ -21,6 +23,7 @@ namespace TvTunerService.Modules {
             Get["/BrowseEZTV"] = BrowseEZTV;
             Get["/Shows/"] = Shows;
             Get["/Shows/Show/{id}"] = Show;
+            Post["/Show/Upload/{id}"] = UploadEpisode;
             Get["/Show/Watch/{id}"] = WatchEpisode;
             Get["/Show/Next/{id}"] = NextEpisode;
 
@@ -52,13 +55,16 @@ namespace TvTunerService.Modules {
             EZTVEpisodeList episodes = null;
             if (results.Count == 1 && showEpisodes) {
                 episodes = EZTV.EZTV.GetEpisodes(results.First().Id);
-                var myShowEpisodes = ShowRepository.Instance[episodes.ShowTitle].Episodes;
-                foreach (var episode in episodes.Episodes) {
-                    EZTVEpisode episode1 = episode;
-                    var libEpisode = myShowEpisodes.FirstOrDefault(e=>e.SeasonNumber == episode1.Season && e.EpisodeNumber == episode1.EpisodeNum && e.Filename.Contains(episode1.Title.Replace(' ', '.')));
-                    if ( libEpisode != null) {
-                        episode.InLibrary = true;
-                        episode.LibId = libEpisode.ID;
+                var libShow = ShowRepository.Instance[episodes.ShowTitle];
+                if (libShow != null) {
+                    var myShowEpisodes = libShow.Episodes;
+                    foreach (var episode in episodes.Episodes) {
+                        EZTVEpisode episode1 = episode;
+                        var libEpisode = myShowEpisodes.FirstOrDefault(e => e.SeasonNumber == episode1.Season && e.EpisodeNumber == episode1.EpisodeNum && e.Filename.Contains(episode1.Title.Replace(' ', '.')));
+                        if (libEpisode != null) {
+                            episode.InLibrary = true;
+                            episode.LibId = libEpisode.ID;
+                        }
                     }
                 }
             }
@@ -237,6 +243,42 @@ namespace TvTunerService.Modules {
                 });
             }
             return NancyUtils.JsonResponse("No result found");
+        }
+        private dynamic UploadEpisode(dynamic parameters) {
+            int id = parameters.id;
+
+            var file = Request.Files.FirstOrDefault();
+            var filename = file.Name;
+
+
+            var show = ShowRepository.Instance[id];
+            file.Value.CopyTo(new FileStream(Path.Combine(TorrentEngine.DownloadBasePath, show.Name.Replace(" ", "_"), filename), FileMode.OpenOrCreate));
+
+            if (!show.HasEpisode(filename)) {
+                var m1 = Regex.Match(filename, "S([0-9]+)");
+                var m2 = Regex.Match(filename, "E([0-9]+)");
+
+                var season = Convert.ToInt32(m1.Groups[1].Value);
+                var episodeNum = Convert.ToInt32(m2.Groups[1].Value);
+
+                var showInfo = TvDbModule.LookupUploadedEpisode(show.Name, season, episodeNum);
+
+                var episode = new Episode(show) {
+                    Title = showInfo.title,
+                    Summary = showInfo.summary,
+                    ThumbFilePath = showInfo.imgDlPath,
+                    SeasonNumber = season,
+                    EpisodeNumber = episodeNum,
+                    Filename = filename
+                };
+                id = episode.ID;
+                show.Episodes.Add(
+                    episode
+                );
+            }
+            ShowRepository.Instance.SaveData();
+
+            return View["Views/Shows/Show", new ShowModel(Context, show)];
         }
     }
 }

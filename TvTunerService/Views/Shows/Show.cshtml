@@ -15,15 +15,20 @@
 
 
         </div>
+        <form action="~/Show/Upload/@Model.Show.ID" method="POST" enctype="multipart/form-data">
+            <div><b>Upload episode:</b></div>
+            <input name="upload" type="file"/>
+            <input type="submit" value="Post!"/>
+        </form>
         <table class="table">
             <tbody>
-                @foreach (var episode in Model.Show.Episodes.OrderByDescending(e=>e.SeasonNumber).ThenByDescending(e=>e.EpisodeNumber)) {
+                @foreach (var episode in Model.Show.Episodes.OrderByDescending(e => e.SeasonNumber).ThenByDescending(e => e.EpisodeNumber)) {
                     <tr>
                         <td style="width: 416px;">
                             <a href="~/Show/Watch/@episode.ID"><img src="@Url.Content("~/"+episode.ThumbFilePath)" /></a>
                         </td>
-                        <td >
-                            
+                        <td>
+
                             <div><h2>@episode.Title</h2><a href="#"><span class="glyphicon glyphicon-list-alt getEpisodeInfo" data-id="@episode.ID"></span></a></div>
                             <div><label>Season:</label>@episode.SeasonNumber</div>
                             <div><label>Episode:</label> @episode.EpisodeNumber</div>

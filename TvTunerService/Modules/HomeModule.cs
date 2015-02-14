@@ -252,7 +252,8 @@ namespace TvTunerService.Modules {
 
 
             var show = ShowRepository.Instance[id];
-            file.Value.CopyTo(new FileStream(Path.Combine(TorrentEngine.DownloadBasePath, show.Name.Replace(" ", "_"), filename), FileMode.OpenOrCreate));
+            var dlPath = Path.Combine(TorrentEngine.DownloadBasePath, show.Name.Replace(" ", "_"), filename);
+            file.Value.CopyTo(new FileStream(dlPath, FileMode.OpenOrCreate));
 
             if (!show.HasEpisode(filename)) {
                 var m1 = Regex.Match(filename, "S([0-9]+)");
@@ -269,7 +270,7 @@ namespace TvTunerService.Modules {
                     ThumbFilePath = showInfo.imgDlPath,
                     SeasonNumber = season,
                     EpisodeNumber = episodeNum,
-                    Filename = filename
+                    Filename = dlPath
                 };
                 id = episode.ID;
                 show.Episodes.Add(

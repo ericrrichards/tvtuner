@@ -255,9 +255,9 @@ namespace TvTunerService.Modules {
             var dlPath = Path.Combine(TorrentEngine.DownloadBasePath, show.Name.Replace(" ", "_"), filename);
             file.Value.CopyTo(new FileStream(dlPath, FileMode.OpenOrCreate));
 
-            if (!show.HasEpisode(filename)) {
-                var m1 = Regex.Match(filename, "S([0-9]+)");
-                var m2 = Regex.Match(filename, "E([0-9]+)");
+            if (!show.HasEpisode(dlPath)) {
+                var m1 = Regex.Match(filename, "[Ss]([0-9]+)");
+                var m2 = Regex.Match(filename, "[Ee]([0-9]+)");
 
                 var season = Convert.ToInt32(m1.Groups[1].Value);
                 var episodeNum = Convert.ToInt32(m2.Groups[1].Value);
@@ -276,8 +276,9 @@ namespace TvTunerService.Modules {
                 show.Episodes.Add(
                     episode
                 );
+                ShowRepository.Instance.SaveData();
             }
-            ShowRepository.Instance.SaveData();
+            
 
             return View["Views/Shows/Show", new ShowModel(Context, show)];
         }

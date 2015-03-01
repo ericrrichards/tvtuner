@@ -1,0 +1,11 @@
+﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<TvTunerService.Models.MovieModel>
+
+@{
+    Layout = "Views/Shared/_Layout.cshtml";
+}
+
+<h3></h3>
+
+<video width="932" controls="controls" autoplay="autoplay">
+    <source src="@Url.Content("~/MovieVideo/"+Model.Movie.ID)" type="video/mp4" />
+</video>

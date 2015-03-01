@@ -33,6 +33,10 @@ namespace TvTunerService.Modules {
             Get["/ShowInformation/{name}"] = ShowInformation;
             Get["/EpisodeInformation/{id}"] = EpisodeInformation;
 
+            Get["/Movies"] = Movies;
+            Get["/Movies/Watch/{id}"] = WatchMovie;
+            Get["/MovieVideo/{movieID}"] = MovieVideo;
+
         }
 
         private dynamic Index(dynamic parameters) {
@@ -52,7 +56,8 @@ namespace TvTunerService.Modules {
             EZTVEpisodeList episodes = null;
             if (results.Count == 1 && showEpisodes) {
                 episodes = EZTV.EZTV.GetEpisodes(results.First().Id);
-                var myShowEpisodes = ShowRepository.Instance[episodes.ShowTitle].Episodes;
+                var show = ShowRepository.Instance[episodes.ShowTitle];
+                var myShowEpisodes = show!= null ? show.Episodes : new List<Episode>();
                 foreach (var episode in episodes.Episodes) {
                     EZTVEpisode episode1 = episode;
                     var libEpisode = myShowEpisodes.FirstOrDefault(e=>e.SeasonNumber == episode1.Season && e.EpisodeNumber == episode1.EpisodeNum && e.Filename.Contains(episode1.Title.Replace(' ', '.')));
@@ -237,6 +242,21 @@ namespace TvTunerService.Modules {
                 });
             }
             return NancyUtils.JsonResponse("No result found");
+        }
+
+        private dynamic Movies(dynamic parameters) {
+            return View["Views/Movies/Index", new MoviesIndexModel(Context,ShowRepository.Instance.Movies)];
+        }
+        private dynamic WatchMovie(dynamic parameters) {
+            int id = parameters.id;
+            var movieModel = new MovieModel(Context, ShowRepository.Instance.Movies.First(m => m.ID == id));
+            return View["Views/Movies/Watch", movieModel];
+        }
+        private dynamic MovieVideo(dynamic parameters) {
+            int id = parameters.movieID;
+            var path = ShowRepository.Instance.Movies.First(e => e.ID == id).Filename;
+
+            return Response.FromPartialFile(Request, path, "video/mp4");
         }
     }
 }

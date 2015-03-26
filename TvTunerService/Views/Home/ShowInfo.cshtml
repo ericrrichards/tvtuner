@@ -137,7 +137,7 @@
                 function (data) {
                     if (data === "Success") {
                         $("#showModal").modal('hide');
-                        window.location.reload();
+                        window.location = window.location.href.split("?")[0];
                     } else {
                         $("#btnSaveShow").parent().append(
                             '<div class="alert alert-success alert-dismissible fade in" role="alert">' +

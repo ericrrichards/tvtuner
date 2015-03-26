@@ -8,34 +8,49 @@
 
 <div class="row">
     <div class="col-sm-12">
+        <input type="hidden" id="id" value="@Model.Show.ID"/>
         <h2 id="showName">@Model.Show.Name</h2>
-        <img src="@Url.Content(Model.Show.BannerImg)" />
+        <img src="@Url.Content(Model.Show.BannerImg)"/>
         <div style="max-width: 758px">
             <div class="well">@Model.Show.Summary</div>
 
 
         </div>
-        <form action="~/Show/Upload/@Model.Show.ID" method="POST" enctype="multipart/form-data">
-            <div><b>Upload episode:</b></div>
-            <input name="upload" type="file"/>
-            <input type="submit" value="Post!"/>
-        </form>
+        <table>
+            <tr>
+                <td>
+                    <form action="~/Show/Upload/@Model.Show.ID" method="POST" enctype="multipart/form-data">
+                        <div>
+                            <b>Upload episode:</b>
+                        </div>
+                        <input name="upload" type="file" id="filename"/>
+
+                        <input type="submit" value="Post!"/>
+                    </form>
+                </td>
+                <td>
+                    <button class="btn btn-primary" id="checkExistsAdd">Check</button>
+                </td>
+            </tr>
+        </table>
         <table class="table">
             <tbody>
-                @foreach (var episode in Model.Show.Episodes.OrderByDescending(e => e.SeasonNumber).ThenByDescending(e => e.EpisodeNumber)) {
-                    <tr>
-                        <td style="width: 416px;">
-                            <a href="~/Show/Watch/@episode.ID"><img src="@Url.Content("~/"+episode.ThumbFilePath)" /></a>
-                        </td>
-                        <td>
+            @foreach (var episode in Model.Show.Episodes.OrderByDescending(e => e.SeasonNumber).ThenByDescending(e => e.EpisodeNumber)) {
+                <tr>
+                    <td style="width: 416px;">
+                        <a href="~/Show/Watch/@episode.ID"><img src="@Url.Content("~/" + episode.ThumbFilePath)"/></a>
+                    </td>
+                    <td>
 
-                            <div><h2>@episode.Title</h2><a href="#"><span class="glyphicon glyphicon-list-alt getEpisodeInfo" data-id="@episode.ID"></span></a></div>
-                            <div><label>Season:</label>@episode.SeasonNumber</div>
-                            <div><label>Episode:</label> @episode.EpisodeNumber</div>
-                            <div>@episode.Summary</div>
-                        </td>
-                    </tr>
-                }
+                        <div>
+                            <h2>@episode.Title</h2><a href="#"><span class="glyphicon glyphicon-list-alt getEpisodeInfo" data-id="@episode.ID"></span></a>
+                        </div>
+                        <div><label>Season:</label>@episode.SeasonNumber</div>
+                        <div><label>Episode:</label> @episode.EpisodeNumber</div>
+                        <div>@episode.Summary</div>
+                    </td>
+                </tr>
+            }
             </tbody>
         </table>
     </div>
@@ -45,6 +60,18 @@
 
 <script>
     $(function () {
+        var epId = tvtuner.getUrlVars()["epId"];
+        if (epId !== undefined) {
+            tvtuner.ClearModal();
+            $("#originalEpisodeId").val(epId);
+
+            tvtuner.GetShowInformationFromRepository($("#showName").text(), tvtuner.LookupShow);
+            tvtuner.GetEpisodeInformationFromRepository(epId, tvtuner.LookupEpisode);
+
+            $("#showModal").modal();
+        }
+
+
         $(".getEpisodeInfo").on("click", function () {
             var id = $(this).data("id");
             tvtuner.ClearModal();
@@ -57,6 +84,20 @@
 
 
 
+        });
+        $("#checkExistsAdd").on("click", function() {
+            var filename = $("#filename").val();
+            console.log(filename);
+            var id = $("#id").val();
+            $.get(tvtuner.getBaseURL() + "Show/CheckExists/" + id + "?filename=" + filename,
+                function (data) {
+                    if (data.indexOf("Success") >=0) {
+                        var id = data.split("-")[1].trim();
+                        window.location = window.location.href.substr(0, window.location.href.indexOf('#')) + "?epId=" + id;
+                    } else {
+                        alert("Must upload file");
+                    }
+            });
         });
     });
 </script>

@@ -20,7 +20,7 @@
 <div class="text-center">
     
     <h3><a href="@Url.Action("WatchChannel", new { id=ViewBag.ChannelID})" >Season @Model.Season Episode @Model.EpisodeNumber - @Model.Name</a></h3>
-    <video width="932" height="700" controls="controls" autoplay="autoplay">
+    <video controls="controls" autoplay="autoplay">
         <source src="@Model.VideoPath" type="video/mp4"/>
     </video>
 </div>

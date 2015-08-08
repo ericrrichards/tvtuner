@@ -135,3 +135,7 @@ body {
 }
 
 
+video {
+  width: 100%    !important;
+  height: 900px   !important;
+}

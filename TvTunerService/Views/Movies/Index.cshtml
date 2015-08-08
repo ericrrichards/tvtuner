@@ -1,0 +1,13 @@
+﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<TvTunerService.Models.MoviesIndexModel>
+
+@{
+    Layout = "Views/Shared/_Layout.cshtml";
+}
+
+<h2>Movies</h2>
+
+<ul>
+    @foreach (var movie in Model.Movies) {
+        <li><a href="~/Movies/Watch/@movie.ID">@movie.Title</a></li>
+    }
+</ul>

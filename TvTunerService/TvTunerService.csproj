@@ -83,8 +83,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Infrastructure\Episode.cs" />
+    <Compile Include="Infrastructure\Movie.cs" />
     <Compile Include="Infrastructure\NancyUtils.cs" />
     <Compile Include="Infrastructure\RazorConfig.cs" />
+    <Compile Include="Infrastructure\Show.cs" />
     <Compile Include="Infrastructure\ShowRepository.cs" />
     <Compile Include="Infrastructure\Startup.cs" />
     <Compile Include="Infrastructure\TorrentEngine.cs" />
@@ -94,8 +97,14 @@
     <Compile Include="Infrastructure\TvTunerSvc.Designer.cs">
       <DependentUpon>TvTunerSvc.cs</DependentUpon>
     </Compile>
+    <Compile Include="Models\BrowseEztvModel.cs" />
+    <Compile Include="Models\EpisodeModel.cs" />
     <Compile Include="Models\ModelBase.cs" />
     <Compile Include="Models\AddToLibraryModel.cs" />
+    <Compile Include="Models\MovieModel.cs" />
+    <Compile Include="Models\ShowIndexModel.cs" />
+    <Compile Include="Models\ShowModel.cs" />
+    <Compile Include="Models\UpdateShowModel.cs" />
     <Compile Include="Modules\HomeModule.cs" />
     <Compile Include="Modules\TvDbModule.cs" />
     <Compile Include="Program.cs" />
@@ -153,6 +162,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Views\Home\ShowInfo.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Views\Movies\Index.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Views\Movies\Watch.cshtml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Views\Shows\Index.cshtml">

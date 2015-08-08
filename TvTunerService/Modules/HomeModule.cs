@@ -8,6 +8,7 @@ using EZTV;
 using log4net;
 using Nancy;
 using Nancy.ModelBinding;
+using Nancy.Responses;
 using TvTunerService.Infrastructure;
 using TvTunerService.Models;
 
@@ -23,7 +24,9 @@ namespace TvTunerService.Modules {
             Get["/BrowseEZTV"] = BrowseEZTV;
             Get["/Shows/"] = Shows;
             Get["/Shows/Show/{id}"] = Show;
+            Post["/Shows/Show/{id}"] = Show;
             Post["/Show/Upload/{id}"] = UploadEpisode;
+            Get["/Show/CheckExists/{id}"] = CheckExists;
             Get["/Show/Watch/{id}"] = WatchEpisode;
             Get["/Show/Next/{id}"] = NextEpisode;
 
@@ -35,6 +38,10 @@ namespace TvTunerService.Modules {
             Get["/Video/{episodeID}"] = Video;
             Get["/ShowInformation/{name}"] = ShowInformation;
             Get["/EpisodeInformation/{id}"] = EpisodeInformation;
+
+            Get["/Movies"] = Movies;
+            Get["/Movies/Watch/{id}"] = WatchMovie;
+            Get["/MovieVideo/{movieID}"] = MovieVideo;
 
         }
 
@@ -99,7 +106,7 @@ namespace TvTunerService.Modules {
                 return NancyUtils.JsonResponse(nextInSeason.ID);
             }
 
-            foreach (var season in show.Seasons.Where(s=> s > episode.SeasonNumber)) {
+            foreach (var season in show.Seasons.Where(s => s > episode.SeasonNumber)) {
                 var firstInNextSeason = show.Season(season).FirstOrDefault();
                 if (firstInNextSeason != null) {
                     return NancyUtils.JsonResponse(firstInNextSeason.ID);
@@ -235,7 +242,7 @@ namespace TvTunerService.Modules {
             var episode = ShowRepository.Instance.Episodes.FirstOrDefault(e => e.ID == id);
             if (episode != null) {
                 return NancyUtils.JsonResponse(new {
-                    episode.SeasonNumber, 
+                    episode.SeasonNumber,
                     episode.EpisodeNumber,
                     episode.Title,
                     episode.Summary,
@@ -244,43 +251,142 @@ namespace TvTunerService.Modules {
             }
             return NancyUtils.JsonResponse("No result found");
         }
+
+        private dynamic CheckExists(dynamic parameters) {
+            int id = parameters.id;
+
+            var filename = Request.Query["filename"];
+            Log.Debug(filename);
+            filename = Path.GetFileName(filename);
+            if (filename == null) {
+                return NancyUtils.JsonResponse("Nope");
+            }
+            
+            var show = ShowRepository.Instance[id];
+            var ep1 = show.Episodes.FirstOrDefault();
+            var showDir = show.Name.Replace(" ", "_");
+            if (ep1 != null && (!ep1.Filename.Contains(showDir))) {
+                showDir = Path.GetDirectoryName(ep1.Filename);
+                showDir = showDir.Replace(TorrentEngine.DownloadBasePath, "").Trim(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            }
+            var dlPath = Path.Combine(TorrentEngine.DownloadBasePath, showDir, filename);
+
+            if (File.Exists(dlPath)) {
+                if (!show.HasEpisode(dlPath)) {
+                    var m1 = Regex.Match(filename, "[Ss]([0-9]+)");
+                    var m2 = Regex.Match(filename, "[Ee]([0-9]+)");
+                    try {
+                        var season = Convert.ToInt32(m1.Groups[1].Value);
+                        var episodeNum = Convert.ToInt32(m2.Groups[1].Value);
+
+                        var showInfo = TvDbModule.LookupUploadedEpisode(show.Name, season, episodeNum);
+
+                        var episode = new Episode(show) {
+                            Title = showInfo.title,
+                            Summary = showInfo.summary,
+                            ThumbFilePath = showInfo.imgDlPath,
+                            SeasonNumber = season,
+                            EpisodeNumber = episodeNum,
+                            Filename = dlPath
+                        };
+                        id = episode.ID;
+                        show.Episodes.Add(episode);
+                    } catch (Exception ex) {
+                        Log.Error("Exception in " + ex.TargetSite.Name, ex);
+                        var episode = new Episode(show) {
+                            Title = Path.GetFileNameWithoutExtension(dlPath),
+                            Summary = "",
+                            ThumbFilePath = "",
+                            SeasonNumber = 0,
+                            EpisodeNumber = 0,
+                            Filename = dlPath
+                        };
+                        id = episode.ID;
+                        show.Episodes.Add(episode);
+
+                    }
+                    ShowRepository.Instance.SaveData();
+                }
+            } else {
+                return NancyUtils.JsonResponse("Nope");
+            }
+            return NancyUtils.JsonResponse("Success - " + id);
+        }
+
         private dynamic UploadEpisode(dynamic parameters) {
             int id = parameters.id;
 
             var file = Request.Files.FirstOrDefault();
+
             var filename = file.Name;
 
 
             var show = ShowRepository.Instance[id];
-            var dlPath = Path.Combine(TorrentEngine.DownloadBasePath, show.Name.Replace(" ", "_"), filename);
-            file.Value.CopyTo(new FileStream(dlPath, FileMode.OpenOrCreate));
+            var ep1 = show.Episodes.FirstOrDefault();
+            var showDir = show.Name.Replace(" ", "_");
+            if (ep1 != null && (!ep1.Filename.Contains(showDir))) {
+                showDir = Path.GetDirectoryName(ep1.Filename);
+                showDir = showDir.Replace(TorrentEngine.DownloadBasePath, "").Trim(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            }
+
+            var dlPath = Path.Combine(TorrentEngine.DownloadBasePath, showDir, filename);
+            if (!File.Exists(dlPath)) {
+                file.Value.CopyTo(new FileStream(dlPath, FileMode.OpenOrCreate));
+            }
 
             if (!show.HasEpisode(dlPath)) {
                 var m1 = Regex.Match(filename, "[Ss]([0-9]+)");
                 var m2 = Regex.Match(filename, "[Ee]([0-9]+)");
+                try {
+                    var season = Convert.ToInt32(m1.Groups[1].Value);
+                    var episodeNum = Convert.ToInt32(m2.Groups[1].Value);
 
-                var season = Convert.ToInt32(m1.Groups[1].Value);
-                var episodeNum = Convert.ToInt32(m2.Groups[1].Value);
+                    var showInfo = TvDbModule.LookupUploadedEpisode(show.Name, season, episodeNum);
 
-                var showInfo = TvDbModule.LookupUploadedEpisode(show.Name, season, episodeNum);
+                    var episode = new Episode(show) {
+                        Title = showInfo.title,
+                        Summary = showInfo.summary,
+                        ThumbFilePath = showInfo.imgDlPath,
+                        SeasonNumber = season,
+                        EpisodeNumber = episodeNum,
+                        Filename = dlPath
+                    };
+                    id = episode.ID;
+                    show.Episodes.Add(episode);
+                } catch (Exception ex) {
+                    Log.Error("Exception in " + ex.TargetSite.Name, ex);
+                    var episode = new Episode(show) {
+                        Title = Path.GetFileNameWithoutExtension(dlPath),
+                        Summary = "",
+                        ThumbFilePath = "",
+                        SeasonNumber = 0,
+                        EpisodeNumber = 0,
+                        Filename = dlPath
+                    };
+                    id = episode.ID;
+                    show.Episodes.Add(episode);
 
-                var episode = new Episode(show) {
-                    Title = showInfo.title,
-                    Summary = showInfo.summary,
-                    ThumbFilePath = showInfo.imgDlPath,
-                    SeasonNumber = season,
-                    EpisodeNumber = episodeNum,
-                    Filename = dlPath
-                };
-                id = episode.ID;
-                show.Episodes.Add(
-                    episode
-                );
+                }
                 ShowRepository.Instance.SaveData();
             }
-            
 
-            return View["Views/Shows/Show", new ShowModel(Context, show)];
+
+            return Response.AsRedirect("~/Shows/Show/" + show.ID + "?epId="+id, RedirectResponse.RedirectType.Temporary);
+        }
+
+        private dynamic Movies(dynamic parameters) {
+            return View["Views/Movies/Index", new MoviesIndexModel(Context, ShowRepository.Instance.Movies)];
+        }
+        private dynamic WatchMovie(dynamic parameters) {
+            int id = parameters.id;
+            var movieModel = new MovieModel(Context, ShowRepository.Instance.Movies.First(m => m.ID == id));
+            return View["Views/Movies/Watch", movieModel];
+        }
+        private dynamic MovieVideo(dynamic parameters) {
+            int id = parameters.movieID;
+            var path = ShowRepository.Instance.Movies.First(e => e.ID == id).Filename;
+
+            return Response.FromPartialFile(Request, path, "video/mp4");
         }
     }
 }

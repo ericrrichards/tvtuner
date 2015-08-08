@@ -3,23 +3,29 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using log4net;
 
 namespace TvTunerService.Infrastructure {
     class ShowRepository {
+        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         internal List<Show> Shows { get; set; }
 
         public List<Episode> Episodes {
             get { return Shows.SelectMany(s => s.Episodes).ToList(); }
         }
 
+        public List<Movie> Movies { get; set; } 
+
         private static readonly ShowRepository _instance = new ShowRepository();
         public static ShowRepository Instance { get { return _instance; } }
 
         private ShowRepository() {
             Shows = new List<Show>();
+            Movies = new List<Movie>();
             if (!File.Exists("showData.xml")) {
                 var file = new XDocument(new XDeclaration("1.0", "utf-8", "yes"), new XElement("shows"));
                 file.Save("showData.xml");
@@ -29,12 +35,23 @@ namespace TvTunerService.Infrastructure {
             foreach (var show in shows) {
                 Shows.Add(Show.Parse(show));
             }
+            try {
+                var movies = doc.Descendants("movie");
+                foreach (var movie in movies) {
+                    Movies.Add(Movie.Parse(movie));
+                }
+            } catch (Exception ex) {
+                Log.Error("Exception in " + ex.TargetSite.Name, ex);
+            }
         }
 
         public void SaveData() {
             var file = new XDocument(
                 new XDeclaration("1.0", "utf-8", "yes"), 
-                new XElement("shows", Shows.Select(s=>s.ToXml()))
+                new XElement("root",
+                    new XElement("shows", Shows.Select(s=>s.ToXml())),
+                    new XElement("movies", Movies.Select(m=>m.ToXml()))
+                )
             );
             file.Save("showData.xml");
         }
@@ -47,118 +64,6 @@ namespace TvTunerService.Infrastructure {
         }
         public void AddShow(Show s) {
             Shows.Add(s);
-        }
-    }
-
-    public class Show {
-        private static int _nextID;
-
-        public int ID { get; set; }
-        public string Name { get; set; }
-        public string Summary { get; set; }
-        public string BannerImg { get; set; }
-        public List<Episode> Episodes { get; set; }
-
-        private Show() {
-            Episodes = new List<Episode>();
-        }
-
-        public Show(string name) :this() {
-            Name = name;
-            ID = _nextID++;
-        }
-
-        public IEnumerable<Episode> Season(int seasonNumber) {
-            return Episodes.Where(e => e.SeasonNumber == seasonNumber).OrderBy(e => e.EpisodeNumber);
-        }
-        public IEnumerable<int> Seasons { get { return Episodes.Select(e => e.SeasonNumber).Distinct().OrderBy(a=>a); } }
-
-        public Episode FirstEpisode {
-            get { return Season(Seasons.Min()).FirstOrDefault(); }
-        }
-
-
-        public bool HasEpisode(string filename) {
-            return Episodes.Any(e => e.Filename == filename);
-        }
-
-        public static Show Parse(XElement show) {
-            var summaryElem = show.Descendants("summary").FirstOrDefault();
-            var bannerElem = show.Descendants("bannerImg").FirstOrDefault();
-            var ret = new Show {
-                ID = Convert.ToInt32(show.Descendants("id").First().Value),
-                Name = show.Descendants("name").First().Value,
-                Summary = summaryElem != null ? summaryElem.Value : "",
-                BannerImg = bannerElem != null ? bannerElem.Value : "",
-                Episodes = show.Descendants("episode").Select(Episode.Parse).ToList()
-            };
-            foreach (var episode in ret.Episodes) {
-                episode.Show = ret;
-            }
-
-            if (ret.ID >= _nextID) {
-                _nextID = ret.ID + 1;
-            }
-            return ret;
-        }
-
-        public XElement ToXml() {
-            return new XElement("show", 
-                new XElement("id", ID),
-                new XElement("name", Name),
-                new XElement("summary", Summary),
-                new XElement("bannerImg", BannerImg),
-                new XElement("episodes", Episodes.Select(e=>e.ToXml()))
-            );
-        }
-    }
-
-    public class Episode {
-        private static int _nextID;
-        public int ID { get; set; }
-        public string Title { get; set; }
-        public int SeasonNumber { get; set; }
-        public int EpisodeNumber { get; set; }
-        public string Filename { get; set; }
-        public string Summary { get; set; }
-        public string ThumbFilePath { get; set; }
-        public Show Show { get; set; }
-
-        private Episode(){}
-
-        public Episode(Show s) {
-            Show = s;
-            ID = _nextID++;
-        }
-
-        public static Episode Parse(XElement xElement) {
-            var summaryElem = xElement.Descendants("summary").FirstOrDefault();
-            var thumbElem = xElement.Descendants("thumb").FirstOrDefault();
-            var ret = new Episode {
-                ID = Convert.ToInt32(xElement.Descendants("id").First().Value),
-                Title = xElement.Descendants("title").First().Value,
-                SeasonNumber = Convert.ToInt32(xElement.Descendants("season").First().Value),
-                EpisodeNumber = Convert.ToInt32(xElement.Descendants("episodeNumber").First().Value),
-                Filename = xElement.Descendants("filename").First().Value,
-                Summary = summaryElem!= null ? summaryElem.Value : "",
-                ThumbFilePath = thumbElem!=null ? thumbElem.Value : ""
-            };
-            if (ret.ID >= _nextID) {
-                _nextID = ret.ID + 1;
-            }
-            return ret;
-        }
-
-        public XElement ToXml() {
-            return new XElement("episode",
-                new XElement("id", ID),
-                new XElement("title", Title),
-                new XElement("season", SeasonNumber),
-                new XElement("episodeNumber", EpisodeNumber),
-                new XElement("filename", Filename),
-                new XElement("summary", Summary),
-                new XElement("thumb", ThumbFilePath)
-            );
         }
     }
 }
